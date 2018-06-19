@@ -1,0 +1,113 @@
+.cal-day.today {
+    color: #116CD6;
+    font-weight: bold;
+}
+
+.cal-tooltip {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+.cal-tooltip:after {
+    border-top: 5px solid rgba(0, 0, 0, 0.8);
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+}
+
+.cal-dimmer {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.cal-display {
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
+    background-color: white;
+    border-radius: 0;
+    color: #3D3D4F;
+}
+
+.cal-display .cal-header {
+    background-color: #F4F5F6;
+    color: #746F70;
+}
+
+.cal-selected-date .cal-selected-day {
+    color: #116CD6;
+    font-weight: 700;
+    letter-spacing: -2px;
+}
+
+.cal-month + .cal-month:before {
+    background-color: #F8F8F9;
+}
+
+.cal-month th {
+    color: #E3E4E9;
+}
+
+.cal-month th[colspan] {
+    color: #3D3D4F;
+}
+
+.cal-day:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.cal-day.today {
+    font-weight: bold;
+}
+
+.cal-tooltip {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-weight: bold;
+}
+
+.cal-tooltip:after {
+    border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+.cal-range.highlight {
+    background-color: #E8F1FB;
+}
+.cal-range.highlight .cal-range-start,
+.cal-range.highlight .cal-range-end {
+    background-color: #116CD6;
+    border-color: #E8F1FB;
+}
+
+.cal-range.selected {
+    background-color: #EDFAED;
+}
+.cal-range.selected .cal-range-start,
+.cal-range.selected .cal-range-end {
+    background-color: #47C849;
+    border-color: #EDFAED;
+}
+
+.cal-day.selected {
+    background-color: #47C849;
+    color: white;
+}
+.cal-day-rangestart, .cal-day-rangeend {
+    color: white;
+}
+
+.cal-button {
+    box-shadow: inset 0 0 0 1px #116CD6;
+    color: #116CD6;
+    border-radius: 0;
+}
+
+.cal-display .cal-header-arrow {
+    background: center center / 32px 32px url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTAgMmwxNCAxNGwtMTQgMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0U0RTZFOSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPgo=");
+}
+
+.cal-nav.cal-prev {
+    background: center center / 32px 32px url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgN2wtOSA5bDkgOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzAzMDMwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+Cg==");
+}
+
+.cal-nav.cal-next {
+    background: center center / 32px 32px url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgN2w5IDlsLTkgOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzAzMDMwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+Cg==");
+}

@@ -1,0 +1,244 @@
+.cal-dimmer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: 99999;
+    transition: opacity .3s;
+    opacity: 0;
+}
+.cal-dimmer.cal-visible {
+    opacity: 1;
+}
+
+.cal-display {
+    position: absolute;
+    z-index: 100000;
+    width: 640px;
+    max-width: calc(100% - 20px);
+    transition: opacity .3s;
+    opacity: 0;
+}
+.cal-display.cal-visible {
+    opacity: 1;
+}
+.cal-display .cal-header {
+    display: none;
+    justify-content: space-between;
+    position: relative;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    height: 57px;
+}
+.cal-display.cal-with-header .cal-header {
+    display: flex;
+}
+.cal-display .cal-header-arrow {
+    position: absolute;
+    top: 50%; left: 50%;
+    margin-top: -16px;
+    margin-left: -16px;
+    width: 32px;
+    height: 32px;
+}
+.cal-selected-date {
+    display: flex;
+    padding: 10px;
+    height: 57px;
+    position: absolute;
+    top: 0; left: 0;
+}
+.cal-selected-date + .cal-selected-date {
+    left: auto;
+    right: 0;
+}
+.cal-selected-date .cal-selected-day {
+    font-size: 40px;
+    line-height: 36px;
+    padding-right: 10px;
+    margin-top: 3px;
+}
+.cal-selected-date .cal-selected-date-content {
+}
+.cal-selected-date .cal-selected-date-month {
+    font-weight: bold;
+}
+.cal-selected-date .cal-selected-date-weekday {
+    font-size: 12px;
+}
+.cal-display .cal-months {
+    display: flex;
+    justify-content: space-evenly;
+}
+.cal-month {
+    position: relative;
+    margin: 10px;
+    width: 100%;
+}
+.cal-month + .cal-month:before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0; bottom: 0; left: -10px;
+    width: 1px;
+}
+.cal-month table {
+    width: 100%;
+    border-collapse: collapse;
+    position: relative;
+    z-index: 1;
+}
+.cal-month thead, .cal-month tbody, .cal-month tfoot, .cal-month tr {
+    background: none !important;
+}
+.cal-month td, th {
+    width: 14.28571%;
+    height: 32px;
+    padding: 0 !important;
+    background: none !important;
+    text-align: center;
+    font-weight: normal;
+    position: relative;
+    text-align: center !important;
+}
+.cal-month-name {
+    font-weight: bold;
+}
+
+.cal-day {
+    display: block;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.cal-day.disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+.cal-day:not(.disabled):hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.cal-tooltip {
+    display: none;
+    position: absolute;
+    height: 24px;
+    padding: 6px 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 2px;
+    z-index: 10;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: bold;
+    pointer-events: none;
+}
+.cal-tooltip:after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 0; height: 0;
+    bottom: -5px; left: 50%;
+    margin-left: -5px;
+    border-top: 5px solid rgba(0, 0, 0, 0.8);
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+}
+.cal-range {
+    position: absolute;
+    height: 32px;
+}
+.cal-range-first {
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+.cal-range-last {
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.cal-range-start, .cal-range-end {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 2px;
+    border: 3px solid transparent;
+}
+.cal-range-start {
+    left: 0;
+}
+.cal-range-end {
+    right: 0;
+}
+[data-week="0"] {
+    top: 64px;
+}
+[data-week="1"] {
+    top: 96px;
+}
+[data-week="2"] {
+    top: 128px;
+}
+[data-week="3"] {
+    top: 160px;
+}
+[data-week="4"] {
+    top: 192px;
+}
+[data-week="5"] {
+    top: 224px;
+}
+
+.cal-actions {
+    padding: 10px;
+    display: none;
+}
+.cal-button {
+    -webkit-appearance: none;
+    margin: 0;
+    border: none;
+    background: none;
+    padding: 8px 10px;
+    width: 100%;
+}
+
+.cal-nav {
+    -webkit-appearance: none;
+    margin: 0;
+    border: none;
+    background: red;
+    position: absolute;
+    top: 9px;
+    width: 32px;
+    height: 32px;
+    z-index: 3;
+}
+.cal-nav.cal-prev {
+    left: 10px;
+}
+.cal-nav.cal-next {
+    right: 10px;
+}
+
+.cal-display.cal-with-header .cal-nav {
+    top: 66px;
+}
+
+
+@media screen and (max-width: 640px) {
+    .cal-selected-date + .cal-selected-date {
+        flex-direction: row-reverse;
+        text-align: right;
+    }
+    .cal-selected-date + .cal-selected-date .cal-selected-day {
+        padding-left: 10px;
+        padding-right: 0;
+    }
+
+    .cal-selected-date .cal-selected-day {
+        font-size: 32px;
+    }
+
+    .cal-actions {
+        display: block;
+    }
+}
