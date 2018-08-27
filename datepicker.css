@@ -9,7 +9,7 @@
     opacity: 1;
 }
 
-.cal-display {
+.cal-display:not(.cal-inline) {
     position: absolute;
     z-index: 100000;
     width: 640px;
