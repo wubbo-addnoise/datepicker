@@ -118,6 +118,13 @@
     background-color: rgba(0, 0, 0, 0.05);
 }
 
+.cal-day-othermonth {
+    display: none;
+}
+.cal-with-othermonths .cal-day-othermonth {
+    display: block;
+}
+
 .cal-tooltip {
     display: none;
     position: absolute;
@@ -240,5 +247,8 @@
 
     .cal-actions {
         display: block;
+    }
+    .cal-inline .cal-actions {
+        display: none;
     }
 }

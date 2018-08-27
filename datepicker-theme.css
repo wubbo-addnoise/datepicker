@@ -3,6 +3,10 @@
     font-weight: bold;
 }
 
+.cal-day-othermonth {
+    color: #E3E4E9;
+}
+
 .cal-tooltip {
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
