@@ -86,18 +86,18 @@
     position: relative;
     z-index: 1;
 }
-.cal-month thead, .cal-month tbody, .cal-month tfoot, .cal-month tr {
+/*.cal-month thead, .cal-month tbody, .cal-month tfoot, .cal-month tr {
     background: none !important;
-}
+}*/
 .cal-month td, th {
     width: 14.28571%;
     height: 32px;
-    padding: 0 !important;
-    background: none !important;
+    padding: 0;
+    background: none;
     text-align: center;
     font-weight: normal;
     position: relative;
-    text-align: center !important;
+    text-align: center;
 }
 .cal-month-name {
     font-weight: bold;
@@ -113,9 +113,6 @@
 .cal-day.disabled {
     opacity: 0.25;
     cursor: not-allowed;
-}
-.cal-day:not(.disabled):hover {
-    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .cal-day-othermonth {

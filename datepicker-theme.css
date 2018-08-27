@@ -56,7 +56,7 @@
     color: #3D3D4F;
 }
 
-.cal-day:hover {
+.cal-day:not(.disabled):hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -92,7 +92,7 @@
     border-color: #EDFAED;
 }
 
-.cal-day.selected {
+.cal-day.selected:not(.cal-day-range) {
     background-color: #47C849;
     color: white;
 }
@@ -117,3 +117,8 @@
 .cal-nav.cal-next {
     background: center center / 32px 32px url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgN2w5IDlsLTkgOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzAzMDMwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+Cg==");
 }
+
+.cal-day-range-start.highlight,.cal-day-range-end.highlight { background-color: #116CD6 !important; color: white; }
+.cal-day-range.highlight { background-color: #E8F1FB; }
+.cal-day-range-start.selected,.cal-day-range-end.selected { background-color: #47C849 !important; color: white; }
+.cal-day-range.selected { background-color: #EDFAED; }
