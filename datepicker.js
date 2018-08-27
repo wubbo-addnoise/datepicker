@@ -406,13 +406,20 @@
      *
      * @param Calendar calendar The calendar
      */
-    function CalendarDisplay(calendar) {
+    function CalendarDisplay(calendar, options) {
+        options = options||{};
+
         this.calendar = calendar;
         this.element = document.createElement('div');
         this.element.className = 'cal-display';
 
-        this.dimmer = document.createElement('div');
-        this.dimmer.className = 'cal-dimmer';
+        if (('inline' in options) && options.inline) {
+            this.element.classList.add('cal-visible');
+            this.element.classList.add('cal-inline');
+        } else {
+            this.dimmer = document.createElement('div');
+            this.dimmer.className = 'cal-dimmer';
+        }
 
         this.header = document.createElement('div');
         this.header.className = 'cal-header';
@@ -437,6 +444,7 @@
 
         if ('ontouchstart' in window) {
             this.element.addEventListener('touchend', this.onClick.bind(this));
+            this.dimmer = null;
         } else {
             this.element.addEventListener('click', this.onClick.bind(this));
             this.element.addEventListener('mousemove', this.onMouseMove.bind(this));
@@ -477,6 +485,7 @@
         this.rangeDisplays = [];
         this.startDate = null;
         this.weekendsDisabled = false;
+        this.isTooltipEnabled = true;
     }
 
         CalendarDisplay.prototype.getMonthDisplay = function(year, month) {
@@ -649,7 +658,7 @@
         };
 
         CalendarDisplay.prototype.showTooltip = function(cell, days) {
-            if (cell) {
+            if (this.isTooltipEnabled && cell) {
                 var left = 0, top = 0, el = cell;
                 while (el && el != this.element) {
                     left += el.offsetLeft;
@@ -669,7 +678,9 @@
                 this.element.style.position = 'fixed';
                 this.element.style.left = '10px';
                 this.element.style.top = ((Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 355) / 2) + 'px';
-                this.dimmer.style.display = 'block';
+                if (this.dimmer) {
+                    this.dimmer.style.display = 'block';
+                }
             } else {
                 if (left + 660 > document.body.clientWidth) {
                     left = (left + activator.offsetWidth) - 640;
@@ -687,7 +698,7 @@
 
             setTimeout(function(){
                 el.classList.add('cal-visible');
-                if (document.body.clientWidth < 640) {
+                if (dim && document.body.clientWidth < 640) {
                     dim.classList.add('cal-visible');
                 }
             }, 100);
@@ -701,14 +712,18 @@
         CalendarDisplay.prototype.close = function() {
             if (!this.cancelClose) {
                 this.element.classList.remove('cal-visible');
-                this.dimmer.classList.remove('cal-visible');
+                if (this.dimmer) {
+                    this.dimmer.classList.remove('cal-visible');
+                }
 
                 var el = this.element,
                     dim = this.dimmer;
 
                 setTimeout(function(){
                     el.style.display = 'none';
-                    dim.style.display = 'none';
+                    if (dim) {
+                        dim.style.display = 'none';
+                    }
                 }, 400);
             }
         };
@@ -781,9 +796,13 @@
             }
         };
 
+        CalendarDisplay.prototype.enableTooltip = function(enable) {
+            this.isTooltipEnabled = (typeof enable == 'undefined') ? true : enable;
+        };
+
     CalendarDisplay.instance = function () {
         if (!CalendarDisplay._instance) {
-            CalendarDisplay._instance = new CalendarDisplay(new Calendar());
+            CalendarDisplay._instance = new CalendarDisplay(Calendar.instance());
             document.body.appendChild(CalendarDisplay._instance.dimmer);
             document.body.appendChild(CalendarDisplay._instance.element);
         }
@@ -831,6 +850,13 @@
         }
         return 31 - (month % 2);
     };
+
+    Calendar.instance = function() {
+        if (!Calendar._instance) {
+            Calendar._instance = new Calendar();
+        }
+        return Calendar._instance;
+    }
 
     function CalendarDate(year, month, day) {
         this.year = parseInt(year);
@@ -914,7 +940,20 @@
         this.startDate = null;
         this.weekendsDisabled = false;
 
-        element.addEventListener('focus', this.onFocus.bind(this));
+        if (options && ('inline' in options) && options.inline) {
+            this.calendarDisplay = new CalendarDisplay(Calendar.instance(), { inline: true });
+            this.element.parentElement.insertBefore(this.calendarDisplay.element, this.element.nextSibling);
+            this.element.style.position = 'absolute';
+            this.element.style.zIndex = -100;
+            this.element.style.pointerEvents = 'none';
+            this.element.style.opacity = 0;
+            this.isInline = true;
+        } else {
+            this.calendarDisplay = CalendarDisplay.instance();
+            this.isInline = false;
+            element.addEventListener('focus', this.onFocus.bind(this));
+        }
+
 
         var dateFormat;
         if (options && ('format' in options)) {
@@ -953,12 +992,28 @@
                 this.date = new CalendarDate(match.year, match.month, match.day);
             }
         }
+
+        if (this.isInline) {
+            this.prepareCalendarDisplay();
+        }
     }
+
+        DatePicker.prototype.prepareCalendarDisplay = function() {
+            var date = this.date ? this.date : CalendarDate.today();
+            this.calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
+            this.calendarDisplay.showHeader(false);
+            this.calendarDisplay.showMonth(date.year, date.month);
+            this.calendarDisplay.setStartDate(this.startDate);
+            this.calendarDisplay.disableWeekends(this.weekendsDisabled);
+            this.calendarDisplay.clearAllRanges();
+            this.calendarDisplay.unmarkDate(null, 'selected');
+            if (this.date) {
+                this.calendarDisplay.markDate(this.date, 'selected');
+            }
+        }
 
         DatePicker.prototype.onFocus = function(e) {
             var el = this.element, left = 0, top = 0;
-            var date = this.date ? this.date : CalendarDate.today();
-            var calendarDisplay = CalendarDisplay.instance();
 
             while (el) {
                 left += el.offsetLeft;
@@ -966,23 +1021,21 @@
                 el = el.offsetParent;
             }
 
-            calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
-            calendarDisplay.showHeader(false);
-            calendarDisplay.showMonth(date.year, date.month);
-            calendarDisplay.setStartDate(this.startDate);
-            calendarDisplay.disableWeekends(this.weekendsDisabled);
-            calendarDisplay.clearAllRanges();
-            calendarDisplay.unmarkDate(null, 'selected');
-            if (this.date) {
-                calendarDisplay.markDate(this.date, 'selected');
-            }
-            calendarDisplay.openAtPosition(left, top, this.element);
+            this.prepareCalendarDisplay();
+            this.calendarDisplay.openAtPosition(left, top, this.element);
         };
 
         DatePicker.prototype.onSelectDate = function(date, endsRange) {
             this.date = date;
             this.element.value = this.dateFormat.fill(date);
-            CalendarDisplay.instance().close();
+            if (this.isInline) {
+                this.calendarDisplay.unmarkDate(null, 'selected');
+                if (this.date) {
+                    this.calendarDisplay.markDate(this.date, 'selected');
+                }
+            } else {
+                this.calendarDisplay.close();
+            }
 
             if (this.changeCallback) {
                 this.changeCallback.call(this.element, date, this.element.value);
@@ -999,6 +1052,28 @@
         this.startDate = null;
         this.weekendsDisabled = false;
         this.separator = ' t/m ';
+        this.showHeader = true;
+        this.showDayCount = true;
+
+        if (options && ('showHeader' in options) && !options.showHeader) {
+            this.showHeader = false;
+        }
+        if (options && ('showDayCount' in options) && !options.showDayCount) {
+            this.showDayCount = false;
+        }
+
+        if (options && ('inline' in options) && options.inline) {
+            this.calendarDisplay = new CalendarDisplay(Calendar.instance(), { inline: true });
+            this.element.parentElement.insertBefore(this.calendarDisplay.element, this.element.nextSibling);
+            this.element.style.position = 'absolute';
+            this.element.style.zIndex = -100;
+            this.element.style.pointerEvents = 'none';
+            this.element.style.opacity = 0;
+            this.isInline = true;
+        } else {
+            this.calendarDisplay = CalendarDisplay.instance();
+            this.isInline = false;
+        }
 
         element.addEventListener('focus', this.onFocus.bind(this));
 
@@ -1053,12 +1128,31 @@
                 }
             }
         }
+
+        if (this.isInline) {
+            this.prepareCalendarDisplay();
+        }
     }
+
+        DateRangePicker.prototype.prepareCalendarDisplay = function() {
+            var date = this.range ? this.range.start : CalendarDate.today();
+            this.calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
+            this.calendarDisplay.onSelectRange = this.onSelectRange.bind(this);
+            this.calendarDisplay.enableTooltip(this.showDayCount);
+            this.calendarDisplay.showHeader(this.showHeader);
+            this.calendarDisplay.showMonth(date.year, date.month);
+            this.calendarDisplay.setStartDate(this.startDate);
+            this.calendarDisplay.disableWeekends(this.weekendsDisabled);
+            this.calendarDisplay.clearAllRanges();
+            if (this.range) {
+                this.calendarDisplay.showMonth(this.range.start.year, this.range.start.month);
+                this.calendarDisplay.markDateRange(this.range, 'selected', true);
+            }
+        }
 
         DateRangePicker.prototype.onFocus = function(e) {
             var el = this.element, left = 0, top = 0;
             var date = this.range ? this.range.start : CalendarDate.today();
-            var calendarDisplay = CalendarDisplay.instance();
 
             while (el) {
                 left += el.offsetLeft;
@@ -1066,18 +1160,7 @@
                 el = el.offsetParent;
             }
 
-            calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
-            calendarDisplay.onSelectRange = this.onSelectRange.bind(this);
-            calendarDisplay.showHeader(true);
-            calendarDisplay.showMonth(date.year, date.month);
-            calendarDisplay.setStartDate(this.startDate);
-            calendarDisplay.disableWeekends(this.weekendsDisabled);
-            calendarDisplay.clearAllRanges();
-            if (this.range) {
-                calendarDisplay.showMonth(this.range.start.year, this.range.start.month);
-                calendarDisplay.markDateRange(this.range, 'selected', true);
-            }
-            calendarDisplay.openAtPosition(left, top, this.element);
+            this.calendarDisplay.openAtPosition(left, top, this.element);
 
             if (document.body.clientWidth < 640) {
                 this.element.blur();
@@ -1089,20 +1172,22 @@
                 if (this.range) {
                     this.range = null;
                 }
-                CalendarDisplay.instance().clearAllRanges();
-                CalendarDisplay.instance().startRangeSelect(date);
+                this.calendarDisplay.clearAllRanges();
+                this.calendarDisplay.startRangeSelect(date);
             }
         };
 
         DateRangePicker.prototype.onSelectRange = function(range) {
             this.range = range;
-            CalendarDisplay.instance().markDateRange(this.range, 'selected', true);
+            this.calendarDisplay.markDateRange(this.range, 'selected', true);
             this.element.value =
                 this.dateFormat.fill(range.start) +
                 this.separator +
                 this.dateFormat.fill(range.end);
 
-            CalendarDisplay.instance().close();
+            if (!this.isInline) {
+                this.calendarDisplay.close();
+            }
 
             if (this.changeCallback) {
                 this.changeCallback.call(this.element, range, this.element.value);
