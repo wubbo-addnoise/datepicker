@@ -1316,4 +1316,19 @@
         }
     });
 
+    if ('jQuery' in window) {
+        jQuery.fn.datePicker = function(options) {
+            this.each(function() {
+                this._datePicker = new DatePicker(this, options);
+            });
+            return this;
+        }
+        jQuery.fn.dateRangePicker = function(options) {
+            this.each(function() {
+                this._datePicker = new DateRangePicker(this, options);
+            });
+            return this;
+        }
+    }
+
 })();
