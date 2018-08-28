@@ -561,6 +561,7 @@
         this.element.appendChild(this.monthContainer);
 
         this.monthSpan = 2;
+        this.forcedMonthSpan = null;
         this.monthDisplays = {};
         this.rangeSelectStart = null;
         this.currRange = null;
@@ -628,7 +629,7 @@
         };
 
         CalendarDisplay.prototype.showMonth = function(year, month) {
-            var monthSpan = (document.body.clientWidth < 640 ? 1 : 2),
+            var monthSpan = this.forcedMonthSpan ? this.forcedMonthSpan : (document.body.clientWidth < 640 ? 1 : 2),
                 child, next, i;
 
             // this.monthContainer.innerHTML = '';
@@ -941,6 +942,10 @@
             }
         };
 
+        CalendarDisplay.prototype.forceMonthSpan = function(span) {
+            this.forcedMonthSpan = span;
+        };
+
     CalendarDisplay.instance = function () {
         if (!CalendarDisplay._instance) {
             CalendarDisplay._instance = new CalendarDisplay(Calendar.instance());
@@ -1102,6 +1107,7 @@
         this.startDate = null;
         this.weekendsDisabled = false;
         this.showOtherMonths = false;
+        this.monthSpan = null;
 
         if (options && ('inline' in options) && options.inline) {
             this.calendarDisplay = new CalendarDisplay(Calendar.instance(), { inline: true });
@@ -1148,6 +1154,9 @@
         if (options && ('showOtherMonths' in options)) {
             this.showOtherMonths = options.showOtherMonths;
         }
+        if (options && ('monthSpan' in options)) {
+            this.monthSpan = options.monthSpan;
+        }
 
         if (element.value) {
             var date, match;
@@ -1168,6 +1177,7 @@
             var date = this.date ? this.date : CalendarDate.today();
             this.calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
             this.calendarDisplay.showHeader(false);
+            this.calendarDisplay.forceMonthSpan(this.monthSpan);
             this.calendarDisplay.showMonth(date.year, date.month);
             this.calendarDisplay.setStartDate(this.startDate);
             this.calendarDisplay.disableWeekends(this.weekendsDisabled);
@@ -1222,6 +1232,7 @@
         this.showHeader = true;
         this.showDayCount = true;
         this.showOtherMonths = false;
+        this.monthSpan = null;
 
         if (options && ('showHeader' in options) && !options.showHeader) {
             this.showHeader = false;
@@ -1275,6 +1286,9 @@
         if (options && ('showOtherMonths' in options)) {
             this.showOtherMonths = options.showOtherMonths;
         }
+        if (options && ('monthSpan' in options)) {
+            this.monthSpan = options.monthSpan;
+        }
 
         if (element.value) {
             var pair = element.value.split(this.separator), start, end, match;
@@ -1311,6 +1325,7 @@
             this.calendarDisplay.onSelectRange = this.onSelectRange.bind(this);
             this.calendarDisplay.enableTooltip(this.showDayCount);
             this.calendarDisplay.showHeader(this.showHeader);
+            this.calendarDisplay.forceMonthSpan(this.monthSpan);
             this.calendarDisplay.showMonth(date.year, date.month);
             this.calendarDisplay.setStartDate(this.startDate);
             this.calendarDisplay.disableWeekends(this.weekendsDisabled);
