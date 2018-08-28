@@ -643,8 +643,10 @@
 
             if (!this.isInline) {
                 this.element.style.width = (320 * monthSpan) + 'px';
-                if (monthSpan == 1) {
+                if (document.body.clientWidth < 640) {
                     this.element.style.width = (document.body.clientWidth - 20) + 'px';
+                } else if (monthSpan == 1) {
+                    this.element.style.width = 500;
                 }
             }
 
