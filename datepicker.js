@@ -646,7 +646,7 @@
                 if (document.body.clientWidth < 640) {
                     this.element.style.width = (document.body.clientWidth - 20) + 'px';
                 } else if (monthSpan == 1) {
-                    this.element.style.width = 500;
+                    this.element.style.width = '500px';
                 }
             }
 
