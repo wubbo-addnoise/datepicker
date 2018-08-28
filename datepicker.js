@@ -650,6 +650,8 @@
                 }
             }
 
+            this.element.className = this.element.className.replace(/\scal-span-\d+/, '') + ' cal-span-' + monthSpan;
+
             this.currYear = year;
             this.currMonth = month;
 
