@@ -302,7 +302,7 @@
                         'cal-day-range' +
                         (isRangeStart && i == 0 ? '-start' : '') +
                         (isRangeEnd && i == numDays-1 ? '-end' : ''));
-                    this.dayCells[index + i].classList.add(className);
+                    this.dayCells[index + i].classList.add('range-' + className);
                 }
             }
         };
@@ -312,6 +312,27 @@
 
             for (i = 0; i < this.dayCells.length; i++) {
                 this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
+                this.dayCells[i].className = this.dayCells[i].className
+                    .replace(/\s+cal-day-range\b/, '')
+                    .replace(/\s+range-[^\s]+/, '');
+            }
+        };
+
+        MonthDisplay.prototype.clearMarkedDates = function() {
+            for (i = 0; i < this.dayCells.length; i++) {
+                this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
+                this.dayCells[i].className = this.dayCells[i].className
+                    .replace(/\s+marked-[^\s]+/, '');
+            }
+        };
+
+        MonthDisplay.prototype.setMarkedDates = function(dates) {
+            var i, day;
+            for (i = 0; i < dates.length; i++) {
+                day = this.element.querySelector('#cal-day-' + dates[i].date);
+                if (day) {
+                    day.classList.add('marked-' + dates[i].className);
+                }
             }
         };
 
@@ -330,14 +351,14 @@
         this.spans = [];
     }
 
-        DateRangeDisplay.prototype.createRangeSpan = function(week, startDay, length) {
-            var span = document.createElement('span');
-            span.className = 'cal-range ' + this.className;
-            span.style.left = (startDay * 100 / 7) + '%';
-            span.style.width = (length * 100 / 7) + '%';
-            span.setAttribute('data-week', week);
-            return span;
-        };
+        // DateRangeDisplay.prototype.createRangeSpan = function(week, startDay, length) {
+        //     var span = document.createElement('span');
+        //     span.className = 'cal-range ' + this.className;
+        //     span.style.left = (startDay * 100 / 7) + '%';
+        //     span.style.width = (length * 100 / 7) + '%';
+        //     span.setAttribute('data-week', week);
+        //     return span;
+        // };
 
         DateRangeDisplay.prototype.render = function() {
             // var date = this.range.start.clone();
@@ -617,6 +638,8 @@
         this.weekendsDisabled = false;
         this.isTooltipEnabled = true;
         this.showOtherMonths = false;
+
+        this.markedDates = {};
     }
 
         CalendarDisplay.prototype.getMonthDisplay = function(year, month) {
@@ -658,6 +681,11 @@
             for (i = 0; i < monthSpan; i++) {
                 md = this.getMonthDisplay(year, month);
                 this.monthContainer.appendChild(md.element);
+
+                md.clearMarkedDates();
+                if ((year in this.markedDates) && (month in this.markedDates[year])) {
+                    md.setMarkedDates(this.markedDates[year][month]);
+                }
 
                 if (++month > 12) {
                     year++;
@@ -950,6 +978,10 @@
             this.forcedMonthSpan = span;
         };
 
+        CalendarDisplay.prototype.setMarkedDates = function(dates) {
+            this.markedDates = dates;
+        }
+
     CalendarDisplay.instance = function () {
         if (!CalendarDisplay._instance) {
             CalendarDisplay._instance = new CalendarDisplay(Calendar.instance());
@@ -1030,9 +1062,20 @@
     };
 
     function CalendarDate(year, month, day) {
-        this.year = parseInt(year);
-        this.month = parseInt(month);
-        this.day = parseInt(day);
+        if (arguments.length == 1 && typeof year == 'string') {
+            var m = year.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if (m) {
+                this.year = parseInt(m[1]);
+                this.month = parseInt(m[2]);
+                this.day = parseInt(m[3]);
+            } else {
+                console.error('Invalid date: ' + year);
+            }
+        } else {
+            this.year = parseInt(year);
+            this.month = parseInt(month);
+            this.day = parseInt(day);
+        }
         this.key = this.year + this.lpad(month, 2) + this.lpad(day, 2);
         this.numDays = Calendar.getNumDays(year, month);
     }
@@ -1112,6 +1155,7 @@
         this.weekendsDisabled = false;
         this.showOtherMonths = false;
         this.monthSpan = null;
+        this.markedDates = {};
 
         if (options && ('inline' in options) && options.inline) {
             this.calendarDisplay = new CalendarDisplay(Calendar.instance(), { inline: true });
@@ -1161,6 +1205,9 @@
         if (options && ('monthSpan' in options)) {
             this.monthSpan = options.monthSpan;
         }
+        if (options && ('markedDates' in options)) {
+            this.markedDates = options.markedDates;
+        }
 
         if (element.value) {
             var date, match;
@@ -1181,6 +1228,7 @@
             var date = this.date ? this.date : CalendarDate.today();
             this.calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
             this.calendarDisplay.showHeader(false);
+            this.calendarDisplay.setMarkedDates(this.markedDates);
             this.calendarDisplay.forceMonthSpan(this.monthSpan);
             this.calendarDisplay.showMonth(date.year, date.month);
             this.calendarDisplay.setStartDate(this.startDate);
@@ -1237,6 +1285,7 @@
         this.showDayCount = true;
         this.showOtherMonths = false;
         this.monthSpan = null;
+        this.markedDates = {};
 
         if (options && ('showHeader' in options) && !options.showHeader) {
             this.showHeader = false;
@@ -1293,6 +1342,19 @@
         if (options && ('monthSpan' in options)) {
             this.monthSpan = options.monthSpan;
         }
+        if (options && ('markedDates' in options)) {
+            var i, date;
+            for (i = 0; i < options.markedDates.length; i++) {
+                date = new CalendarDate(options.markedDates[i].date);
+                if (!(date.year in this.markedDates)) {
+                    this.markedDates[date.year] = {};
+                }
+                if (!(date.month in this.markedDates[date.year])) {
+                    this.markedDates[date.year][date.month] = [];
+                }
+                this.markedDates[date.year][date.month].push(Object.create(options.markedDates[i]));
+            }
+        }
 
         if (element.value) {
             var pair = element.value.split(this.separator), start, end, match;
@@ -1329,6 +1391,7 @@
             this.calendarDisplay.onSelectRange = this.onSelectRange.bind(this);
             this.calendarDisplay.enableTooltip(this.showDayCount);
             this.calendarDisplay.showHeader(this.showHeader);
+            this.calendarDisplay.setMarkedDates(this.markedDates);
             this.calendarDisplay.forceMonthSpan(this.monthSpan);
             this.calendarDisplay.showMonth(date.year, date.month);
             this.calendarDisplay.setStartDate(this.startDate);

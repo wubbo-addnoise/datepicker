@@ -73,7 +73,7 @@
 .cal-tooltip:after {
     border-top-color: rgba(0, 0, 0, 0.8);
 }
-
+/*
 .cal-range.highlight {
     background-color: #E8F1FB;
 }
@@ -91,14 +91,17 @@
     background-color: #47C849;
     border-color: #EDFAED;
 }
+*/
 
-.cal-day.selected:not(.cal-day-range) {
+.cal-day.selected {
     background-color: #47C849;
     color: white;
 }
+/*
 .cal-day-rangestart, .cal-day-rangeend {
     color: white;
 }
+*/
 
 .cal-button {
     box-shadow: inset 0 0 0 1px #116CD6;
@@ -118,7 +121,7 @@
     background: center center / 32px 32px url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgN2w5IDlsLTkgOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzAzMDMwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+Cg==");
 }
 
-.cal-day-range-start.highlight,.cal-day-range-end.highlight { background-color: #116CD6 !important; color: white; }
-.cal-day-range.highlight { background-color: #E8F1FB; }
-.cal-day-range-start.selected,.cal-day-range-end.selected { background-color: #47C849 !important; color: white; }
-.cal-day-range.selected { background-color: #EDFAED; }
+.cal-day-range-start.range-highlight,.cal-day-range-end.range-highlight { background-color: #116CD6 !important; color: white; }
+.cal-day-range.range-highlight { background-color: #E8F1FB; }
+.cal-day-range-start.range-selected,.cal-day-range-end.range-selected { background-color: #47C849 !important; color: white; }
+.cal-day-range.range-selected { background-color: #EDFAED; }

@@ -12,6 +12,10 @@
     body {
         font: 16px sans-serif;
     }
+
+    .cal-day.marked-unavailable {
+        color: #FF3D39;
+    }
     </style>
     <link rel="stylesheet" type="text/css" href="datepicker.css" />
     <link rel="stylesheet" type="text/css" href="datepicker-theme.css" />
@@ -22,11 +26,15 @@
 
 <script src="datepicker.js"></script>
 <script>
+    DatePicker.startOfWeek = 1;
     new DateRangePicker(document.querySelector('[name="mydate"]'), {
         inline: true,
         showHeader: false,
         showDayCount: true,
-        showOtherMonths: true
+        showOtherMonths: true,
+        markedDates: [
+            { date: '2018-09-20', className: 'unavailable' }
+        ]
     });
 </script>
 </body>
