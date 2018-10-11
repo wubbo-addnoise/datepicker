@@ -90,7 +90,7 @@
 /*.cal-month thead, .cal-month tbody, .cal-month tfoot, .cal-month tr {
     background: none !important;
 }*/
-.cal-month td, th {
+.cal-month td, .cal-month th {
     width: 14.28571%;
     height: 32px;
     padding: 0;
