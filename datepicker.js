@@ -1012,15 +1012,31 @@
             return 1 + (diffSeconds / 86400);
         };
 
-    function DatePicker(element, options) {
+/** THE PICKERS **/
+function Picker(element, options) {
+    this.construct(element, options);
+}
+    Picker.prototype.construct = function (element, options) {
         this.element = element;
-        this.element.datePicker = this;
+        this.element.picker = this;
         this.date = null;
+        this.range = null;
+        this.changeCallback = null;
         this.startDate = null;
         this.weekendsDisabled = false;
+        this.separator = ' t/m ';
+        this.showHeader = true;
+        this.showDayCount = true;
         this.showOtherMonths = false;
         this.monthSpan = null;
         this.markedDates = {};
+
+        if (options && ('showHeader' in options) && !options.showHeader) {
+            this.showHeader = false;
+        }
+        if (options && ('showDayCount' in options) && !options.showDayCount) {
+            this.showDayCount = false;
+        }
 
         if (options && ('inline' in options) && options.inline) {
             this.calendarView = new CalendarView(Calendar.instance(), { inline: true });
@@ -1071,143 +1087,6 @@
             this.monthSpan = options.monthSpan;
         }
         if (options && ('markedDates' in options)) {
-            this.markedDates = options.markedDates;
-        }
-
-        if (element.value) {
-            var date, match;
-
-            match = this.dateFormat.match(element.value);
-
-            if (match) {
-                this.date = new CalendarDate(match.year, match.month, match.day);
-            }
-        }
-
-        if (this.isInline) {
-            this.prepareCalendarView();
-        }
-    }
-
-        DatePicker.prototype.prepareCalendarView = function() {
-            var date = this.date ? this.date : CalendarDate.today();
-            this.calendarView.onSelectDate = this.onSelectDate.bind(this);
-            this.calendarView.showHeader(false);
-            this.calendarView.setMarkedDates(this.markedDates);
-            this.calendarView.forceMonthSpan(this.monthSpan);
-            this.calendarView.showMonth(date.year, date.month);
-            this.calendarView.setStartDate(this.startDate);
-            this.calendarView.disableWeekends(this.weekendsDisabled);
-            this.calendarView.enableOtherMonths(this.showOtherMonths);
-            this.calendarView.clearAllRanges();
-            this.calendarView.unmarkDate(null, 'selected');
-            if (this.date) {
-                this.calendarView.markDate(this.date, 'selected');
-            }
-        }
-
-        DatePicker.prototype.onFocus = function(e) {
-            var el = this.element, left = 0, top = 0;
-
-            while (el) {
-                left += el.offsetLeft;
-                top += el.offsetTop;
-                el = el.offsetParent;
-            }
-
-            this.prepareCalendarView();
-            this.calendarView.openAtPosition(left, top, this.element);
-        };
-
-        DatePicker.prototype.onSelectDate = function(date, endsRange) {
-            this.date = date;
-            this.element.value = this.dateFormat.fill(date);
-            if (this.isInline) {
-                this.calendarView.unmarkDate(null, 'selected');
-                if (this.date) {
-                    this.calendarView.markDate(this.date, 'selected');
-                }
-            } else {
-                this.calendarView.close();
-            }
-
-            if (this.changeCallback) {
-                this.changeCallback.call(this.element, date, this.element.value);
-            }
-        };
-
-    DatePicker.startOfWeek = null;
-
-    function DateRangePicker(element, options) {
-        this.element = element;
-        this.element.datePicker = this;
-        this.range = null;
-        this.changeCallback = null;
-        this.startDate = null;
-        this.weekendsDisabled = false;
-        this.separator = ' t/m ';
-        this.showHeader = true;
-        this.showDayCount = true;
-        this.showOtherMonths = false;
-        this.monthSpan = null;
-        this.markedDates = {};
-
-        if (options && ('showHeader' in options) && !options.showHeader) {
-            this.showHeader = false;
-        }
-        if (options && ('showDayCount' in options) && !options.showDayCount) {
-            this.showDayCount = false;
-        }
-
-        if (options && ('inline' in options) && options.inline) {
-            this.calendarView = new CalendarView(Calendar.instance(), { inline: true });
-            this.element.parentElement.insertBefore(this.calendarView.element, this.element.nextSibling);
-            this.element.style.position = 'absolute';
-            this.element.style.zIndex = -100;
-            this.element.style.pointerEvents = 'none';
-            this.element.style.opacity = 0;
-            this.isInline = true;
-        } else {
-            this.calendarView = CalendarView.instance();
-            this.isInline = false;
-        }
-
-        element.addEventListener('focus', this.onFocus.bind(this));
-
-        var dateFormat;
-        if (options && ('format' in options)) {
-            dateFormat = options.format;
-        } else {
-            dateFormat = 'yyyy-mm-dd';
-        }
-
-        this.dateFormat = new Pattern(dateFormat.toLowerCase().replace('yyyy', '{year}').replace('mm', '{month}').replace('dd', '{day}'));
-
-        if (options && ('onChange' in options)) {
-            this.changeCallback = options.onChange;
-        }
-
-        if (options && ('startDate' in options)) {
-            if (options.startDate == 'today') {
-                this.startDate = CalendarDate.today();
-            } else {
-                var sd = this.dateFormat.match(options.startDate);
-                if (sd) {
-                    this.startDate = new CalendarDate(sd.year, sd.month, sd.day);
-                }
-            }
-        }
-
-        if (options && ('disableWeekends' in options)) {
-            this.weekendsDisabled = options.disableWeekends;
-        }
-        if (options && ('showOtherMonths' in options)) {
-            this.showOtherMonths = options.showOtherMonths;
-        }
-        if (options && ('monthSpan' in options)) {
-            this.monthSpan = options.monthSpan;
-        }
-        if (options && ('markedDates' in options)) {
             var i, date;
             for (i = 0; i < options.markedDates.length; i++) {
                 date = new CalendarDate(options.markedDates[i].date);
@@ -1222,27 +1101,7 @@
         }
 
         if (element.value) {
-            var pair = element.value.split(this.separator), start, end, match;
-            if (pair[0]) {
-                match = this.dateFormat.match(pair[0]);
-
-                if (match) {
-                    start = new CalendarDate(match.year, match.month, match.day);
-
-                    if (pair.length > 1 && pair[1]) {
-                        match = this.dateFormat.match(pair[1]);
-                        if (match) {
-                            end = new CalendarDate(match.year, match.month, match.day);
-                        }
-                    }
-
-                    if (!end) {
-                        end = start;
-                    }
-
-                    this.range = new CalendarRange(start, end);
-                }
-            }
+            this.setValue(element.value);
         }
 
         if (this.isInline) {
@@ -1250,70 +1109,137 @@
         }
     }
 
-        DateRangePicker.prototype.prepareCalendarView = function() {
-            var date = this.range ? this.range.start : CalendarDate.today();
-            this.calendarView.onSelectDate = this.onSelectDate.bind(this);
-            this.calendarView.onSelectRange = this.onSelectRange.bind(this);
-            this.calendarView.enableTooltip(this.showDayCount);
-            this.calendarView.showHeader(this.showHeader);
-            this.calendarView.setMarkedDates(this.markedDates);
-            this.calendarView.forceMonthSpan(this.monthSpan);
-            this.calendarView.showMonth(date.year, date.month);
-            this.calendarView.setStartDate(this.startDate);
-            this.calendarView.disableWeekends(this.weekendsDisabled);
-            this.calendarView.enableOtherMonths(this.showOtherMonths);
-            this.calendarView.clearAllRanges();
-            if (this.range) {
-                this.calendarView.showMonth(this.range.start.year, this.range.start.month);
-                this.calendarView.markDateRange(this.range, 'selected', true);
-            }
+    Picker.prototype.setValue = function(value) {}
+
+    Picker.prototype.prepareCalendarView = function() {
+        var date = this.date ? this.date : CalendarDate.today();
+        this.calendarView.onSelectDate = this.onSelectDate.bind(this);
+        this.calendarView.onSelectRange = this.onSelectRange.bind(this);
+        this.calendarView.enableTooltip(this.showDayCount);
+        this.calendarView.showHeader(this.showHeader);
+        this.calendarView.setMarkedDates(this.markedDates);
+        this.calendarView.forceMonthSpan(this.monthSpan);
+        this.calendarView.showMonth(date.year, date.month);
+        this.calendarView.setStartDate(this.startDate);
+        this.calendarView.disableWeekends(this.weekendsDisabled);
+        this.calendarView.enableOtherMonths(this.showOtherMonths);
+        this.calendarView.clearAllRanges();
+        this.calendarView.unmarkDate(null, 'selected');
+        if (this.date) {
+            this.calendarView.markDate(this.date, 'selected');
+        } else if (this.range) {
+            this.calendarView.showMonth(this.range.start.year, this.range.start.month);
+            this.calendarView.markDateRange(this.range, 'selected', true);
+        }
+    }
+
+    Picker.prototype.onFocus = function(e) {
+        var el = this.element, left = 0, top = 0;
+        var date = this.range ? this.range.start : CalendarDate.today();
+
+        while (el) {
+            left += el.offsetLeft;
+            top += el.offsetTop;
+            el = el.offsetParent;
         }
 
-        DateRangePicker.prototype.onFocus = function(e) {
-            var el = this.element, left = 0, top = 0;
-            var date = this.range ? this.range.start : CalendarDate.today();
+        this.prepareCalendarView();
+        this.calendarView.openAtPosition(left, top, this.element);
 
-            while (el) {
-                left += el.offsetLeft;
-                top += el.offsetTop;
-                el = el.offsetParent;
-            }
+        if (document.body.clientWidth < 640) {
+            this.element.blur();
+        }
+    };
 
-            this.calendarView.openAtPosition(left, top, this.element);
+    Picker.prototype.onSelectDate = function(date, endsRange) {};
 
-            if (document.body.clientWidth < 640) {
-                this.element.blur();
-            }
-        };
+Picker.startOfWeek = null;
 
-        DateRangePicker.prototype.onSelectDate = function(date, endsRange) {
-            if (!endsRange) {
-                if (this.range) {
-                    this.range = null;
+function DatePicker(element, options) {
+    this.construct(element, options);
+}
+    DatePicker.prototype = Object.create(Picker.prototype);
+    DatePicker.prototype.setValue = function(value) {
+        var pair = value.split(this.separator), start, end, match;
+        if (pair[0]) {
+            match = this.dateFormat.match(pair[0]);
+
+            if (match) {
+                start = new CalendarDate(match.year, match.month, match.day);
+
+                if (pair.length > 1 && pair[1]) {
+                    match = this.dateFormat.match(pair[1]);
+                    if (match) {
+                        end = new CalendarDate(match.year, match.month, match.day);
+                    }
                 }
-                this.calendarView.clearAllRanges();
-                this.calendarView.startRangeSelect(date);
+
+                if (!end) {
+                    end = start;
+                }
+
+                this.range = new CalendarRange(start, end);
             }
-        };
+        }
+    };
 
-        DateRangePicker.prototype.onSelectRange = function(range) {
-            this.range = range;
-            this.calendarView.markDateRange(this.range, 'selected', true);
-            this.element.value =
-                this.dateFormat.fill(range.start) +
-                this.separator +
-                this.dateFormat.fill(range.end);
-
-            if (!this.isInline) {
-                this.calendarView.close();
+    DatePicker.prototype.onSelectDate = function(date, endsRange) {
+        this.date = date;
+        this.element.value = this.dateFormat.fill(date);
+        if (this.isInline) {
+            this.calendarView.unmarkDate(null, 'selected');
+            if (this.date) {
+                this.calendarView.markDate(this.date, 'selected');
             }
+        } else {
+            this.calendarView.close();
+        }
 
-            if (this.changeCallback) {
-                this.changeCallback.call(this.element, range, this.element.value);
+        if (this.changeCallback) {
+            this.changeCallback.call(this.element, date, this.element.value);
+        }
+    };
+
+function DateRangePicker(element, options) {
+    this.construct(element, options);
+}
+    DateRangePicker.prototype = Object.create(Picker.prototype);
+    DateRangePicker.prototype.setValue = function(value) {
+        var date, match;
+
+        match = this.dateFormat.match(value);
+
+        if (match) {
+            this.date = new CalendarDate(match.year, match.month, match.day);
+        }
+    };
+
+    DateRangePicker.prototype.onSelectDate = function(date, endsRange) {
+        if (!endsRange) {
+            if (this.range) {
+                this.range = null;
             }
-        };
+            this.calendarView.clearAllRanges();
+            this.calendarView.startRangeSelect(date);
+        }
+    };
 
-    DateRangePicker.startOfWeek = null;
+    DateRangePicker.prototype.onSelectRange = function(range) {
+        this.range = range;
+        this.calendarView.markDateRange(this.range, 'selected', true);
+        this.element.value =
+            this.dateFormat.fill(range.start) +
+            this.separator +
+            this.dateFormat.fill(range.end);
+
+        if (!this.isInline) {
+            this.calendarView.close();
+        }
+
+        if (this.changeCallback) {
+            this.changeCallback.call(this.element, range, this.element.value);
+        }
+    };
 
     window.DatePicker = DatePicker;
     window.DateRangePicker = DateRangePicker;
