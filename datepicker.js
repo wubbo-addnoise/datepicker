@@ -173,7 +173,7 @@
      * @param Number month The month
      * @param Calendar calendar The calendar
      */
-    function MonthDisplay(year, month, calendar) {
+    function MonthView(year, month, calendar) {
         this.element = document.createElement('div');
         this.element.className = 'cal-month';
         this.element.setAttribute('data-month', year + '-' + month);
@@ -277,22 +277,22 @@
         this.element.appendChild(table);
     }
 
-        MonthDisplay.prototype.addRangeElement = function(rangeElement) {
+        MonthView.prototype.addRangeElement = function(rangeElement) {
             this.element.appendChild(rangeElement);
         };
 
-        MonthDisplay.prototype.unmarkDates = function(className) {
+        MonthView.prototype.unmarkDates = function(className) {
             var i, cells = this.element.querySelectorAll('.cal-day.'+className);
             for (i = 0; i < cells.length; i++) {
                 cells[i].classList.remove(className);
             }
         };
 
-        MonthDisplay.prototype.spansWeek = function(week) {
+        MonthView.prototype.spansWeek = function(week) {
             return week >= this.startWeek && week <= this.endWeek;
         };
 
-        MonthDisplay.prototype.highlightRange = function(className, startDay, numDays, isRangeStart, isRangeEnd) {
+        MonthView.prototype.highlightRange = function(className, startDay, numDays, isRangeStart, isRangeEnd) {
             var index = startDay - 1,
                 i;
 
@@ -307,7 +307,7 @@
             }
         };
 
-        MonthDisplay.prototype.unhighlightRanges = function() {
+        MonthView.prototype.unhighlightRanges = function() {
             var i;
 
             for (i = 0; i < this.dayCells.length; i++) {
@@ -318,7 +318,7 @@
             }
         };
 
-        MonthDisplay.prototype.clearMarkedDates = function() {
+        MonthView.prototype.clearMarkedDates = function() {
             for (i = 0; i < this.dayCells.length; i++) {
                 this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
                 this.dayCells[i].className = this.dayCells[i].className
@@ -326,7 +326,7 @@
             }
         };
 
-        MonthDisplay.prototype.setMarkedDates = function(dates) {
+        MonthView.prototype.setMarkedDates = function(dates) {
             var i, day;
             for (i = 0; i < dates.length; i++) {
                 day = this.element.querySelector('#cal-day-' + dates[i].date);
@@ -340,150 +340,24 @@
      * Represents a date range in the DOM
      *
      * @param CalendarRange range The range to display
-     * @param CalendarDisplay calendarDisplay The calendar display
+     * @param CalendarView calendarView The calendar display
      * @param String className The class name for the range
      */
-    function DateRangeDisplay(range, calendarDisplay, className) {
+    function DateRangeDisplay(range, calendarView, className) {
         this.range = range;
-        this.calendarDisplay = calendarDisplay;
+        this.calendarView = calendarView;
         this.className = className;
 
         this.spans = [];
     }
 
-        // DateRangeDisplay.prototype.createRangeSpan = function(week, startDay, length) {
-        //     var span = document.createElement('span');
-        //     span.className = 'cal-range ' + this.className;
-        //     span.style.left = (startDay * 100 / 7) + '%';
-        //     span.style.width = (length * 100 / 7) + '%';
-        //     span.setAttribute('data-week', week);
-        //     return span;
-        // };
-
         DateRangeDisplay.prototype.render = function() {
-            // var date = this.range.start.clone();
-            // var startWeekDay = date.getDateObj().getDay() - this.calendarDisplay.calendar.startOfWeek;
-            // var weekDay = startWeekDay;
-            // var monthDisplay = this.calendarDisplay.getMonthDisplay(date.year, date.month);
-            // var monthStartDay = weekDay - ((date.day % 7) - 1);
-            // if (monthStartDay < 0) monthStartDay += 7;
-            // var week = Math.ceil((date.day + monthStartDay) / 7) - 1;
-            // var totalDays = this.range.getNumDays();
-            // var daysLeft = totalDays;
-            // var yearWeek = Calendar.getWeekNumber(date.year, date.month, date.day);
-            // var showOtherMonths = this.calendarDisplay.showOtherMonths;
-
-            // // Render first range
-            // var numDays;
-            // var span;
-
-            // var numDaysMonth = Calendar.getNumDays(date.year, date.month);
-            // var numDaysNext;
-
-            // var startSpan, endSpan, cloneSpan;
-
-            // this.calendarDisplay.markDate(this.range.start, 'cal-day-rangestart');
-            // this.calendarDisplay.markDate(this.range.end, 'cal-day-rangeend');
-
-            // while (daysLeft > 0) {
-            //     numDays = 7 - weekDay;
-
-            //     if (daysLeft < numDays) {
-            //         numDays = daysLeft;
-            //     }
-
-            //     cloneSpan = null;
-
-            //     if (1 + numDaysMonth - date.day < numDays) {
-            //         if (!showOtherMonths) {
-            //             numDays = 1 + numDaysMonth - date.day;
-            //         }
-
-            //         if (numDays > 0) {
-            //             // Render a partial range
-            //             span = this.createRangeSpan(week, weekDay, numDays);
-            //             monthDisplay.addRangeElement(span);
-
-            //             date.increaseWith(numDays);
-            //         }
-            //         week = 0;
-
-            //         monthDisplay = this.calendarDisplay.getMonthDisplay(date.year, date.month);
-            //         numDaysMonth = Calendar.getNumDays(date.year, date.month);
-            //         weekDay += numDays;
-
-            //         if (showOtherMonths && monthDisplay.spansWeek(yearWeek)) {
-            //             cloneSpan = span.cloneNode(true);
-            //             cloneSpan.setAttribute('data-week', '0');
-            //             monthDisplay.addRangeElement(cloneSpan);
-            //         }
-            //     } else {
-            //         // Render a week range
-            //         span = this.createRangeSpan(week, weekDay, numDays);
-            //         monthDisplay.addRangeElement(span);
-
-            //         date.increaseWith(numDays);
-            //         if (date.day == 1) {
-            //             monthDisplay = this.calendarDisplay.getMonthDisplay(date.year, date.month);
-            //             numDaysMonth = Calendar.getNumDays(date.year, date.month);
-            //             week = 0;
-            //         } else {
-            //             week++;
-            //         }
-            //         weekDay = 0;
-            //     }
-
-            //     daysLeft -= numDays;
-
-            //     if (numDays > 0) {
-            //         if (this.spans.length == 0 || (showOtherMonths && week == 1 && this.spans.length == 1)) {
-            //             span.className = span.className + ' cal-range-first';
-            //             startSpan = document.createElement('span');
-            //             startSpan.className = 'cal-range-start ' + this.className;
-            //             startSpan.style.width = (100 / numDays) + '%';
-            //             span.appendChild(startSpan);
-            //             if (cloneSpan) {
-            //                 cloneSpan.appendChild(startSpan.cloneNode(true));
-            //             }
-            //         }
-            //         if (week == 0 && daysLeft <= 7 - weekDay || daysLeft <= 0) {
-            //             span.className = span.className + ' cal-range-last';
-            //             endSpan = document.createElement('span');
-            //             endSpan.className = 'cal-range-end ' + this.className;
-            //             endSpan.style.width = (100 / numDays) + '%';
-            //             span.appendChild(endSpan);
-            //             if (cloneSpan) {
-            //                 cloneSpan.appendChild(endSpan.cloneNode(true));
-            //             }
-            //         }
-
-            //         this.spans.push(span);
-            //         if (cloneSpan) {
-            //             this.spans.push(cloneSpan);
-            //         }
-            //     }
-
-            //     yearWeek++;
-            // }
-
-            // if (showOtherMonths) {
-            //     monthDisplay = this.calendarDisplay.getMonthDisplay(
-            //         this.range.end.month >= 12 ? this.range.end.year + 1 : this.range.end.year,
-            //         this.range.end.month >= 12 ? 1 : this.range.end.month + 1);
-
-            //     if (monthDisplay.spansWeek(yearWeek-1)) {
-            //         cloneSpan = span.cloneNode(true);
-            //         cloneSpan.setAttribute('data-week', '0');
-            //         monthDisplay.addRangeElement(cloneSpan);
-            //         this.spans.push(cloneSpan);
-            //     }
-            // }
             var year = this.range.start.year;
             var month = this.range.start.month;
             var day = this.range.start.day;
             var end = this.range.end.year * 100 + this.range.end.month;
             var numDays = 31;
-            var monthDisplay, isStart = true, isEnd = false;
+            var monthView, isStart = true, isEnd = false;
 
             while (year * 100 + month <= end) {
                 if (year == this.range.end.year && month == this.range.end.month) {
@@ -491,8 +365,8 @@
                     isEnd = true;
                 }
 
-                monthDisplay = this.calendarDisplay.getMonthDisplay(year, month);
-                monthDisplay.highlightRange(this.className, day, numDays, isStart, isEnd);
+                monthView = this.calendarView.getMonthView(year, month);
+                monthView.highlightRange(this.className, day, numDays, isStart, isEnd);
 
                 if (++month >= 12) {
                     year++;
@@ -504,24 +378,15 @@
         };
 
         DateRangeDisplay.prototype.unrender = function() {
-            // var i;
-            // for (i = 0; i < this.spans.length; i++) {
-            //     if (this.spans[i].parentElement) {
-            //         this.spans[i].parentElement.removeChild(this.spans[i]);
-            //     }
-            // }
-            // this.calendarDisplay.unmarkDate(this.range.start, 'cal-day-rangestart');
-            // this.calendarDisplay.unmarkDate(this.range.end, 'cal-day-rangeend');
-            // this.spans = [];
             var year = this.range.start.year;
             var month = this.range.start.month;
             var day = this.range.start.day;
             var end = this.range.end.year * 100 + this.range.end.month;
-            var monthDisplay;
+            var monthView;
 
             while (year * 100 + month <= end) {
-                monthDisplay = this.calendarDisplay.getMonthDisplay(year, month);
-                monthDisplay.unhighlightRanges();
+                monthView = this.calendarView.getMonthView(year, month);
+                monthView.unhighlightRanges();
                 if (++month >= 12) {
                     year++;
                     month = 1;
@@ -529,16 +394,16 @@
             }
         };
 
-    function SelectedDateDisplay(calendarDisplay, calendar) {
-        this.calendarDisplay = calendarDisplay;
+    function SelectedDateView(calendarView, calendar) {
+        this.calendarView = calendarView;
         this.calendar = calendar;
 
         this.element = document.createElement('div');
         this.element.className = 'cal-selected-date';
-        calendarDisplay.header.appendChild(this.element);
+        calendarView.header.appendChild(this.element);
     }
 
-        SelectedDateDisplay.prototype.setDate = function(date) {
+        SelectedDateView.prototype.setDate = function(date) {
             var dateObj = date.getDateObj();
 
             this.element.innerHTML = '<div class="cal-selected-day">' + date.day + '</div>' +
@@ -554,12 +419,12 @@
      *
      * @param Calendar calendar The calendar
      */
-    function CalendarDisplay(calendar, options) {
+    function CalendarView(calendar, options) {
         options = options||{};
 
         this.calendar = calendar;
         this.element = document.createElement('div');
-        this.element.className = 'cal-display';
+        this.element.className = 'cal-view';
 
         if (('inline' in options) && options.inline) {
             this.element.classList.add('cal-visible');
@@ -583,7 +448,7 @@
 
         this.monthSpan = 2;
         this.forcedMonthSpan = null;
-        this.monthDisplays = {};
+        this.monthViews = {};
         this.rangeSelectStart = null;
         this.currRange = null;
         this.currCell = null;
@@ -606,8 +471,8 @@
         this.tooltip.innerHTML = '42 dagen';
         this.element.appendChild(this.tooltip);
 
-        this.selectedDateStart = new SelectedDateDisplay(this, calendar);
-        this.selectedDateEnd = new SelectedDateDisplay(this, calendar);
+        this.selectedDateStart = new SelectedDateView(this, calendar);
+        this.selectedDateEnd = new SelectedDateView(this, calendar);
         this.selectedDateStart.setDate(CalendarDate.today());
 
         var actions = document.createElement('div');
@@ -642,16 +507,16 @@
         this.markedDates = {};
     }
 
-        CalendarDisplay.prototype.getMonthDisplay = function(year, month) {
+        CalendarView.prototype.getMonthView = function(year, month) {
             var key = year + '-' + month;
-            if (!(key in this.monthDisplays)) {
-                this.monthDisplays[key] = new MonthDisplay(year, month, this.calendar);
+            if (!(key in this.monthViews)) {
+                this.monthViews[key] = new MonthView(year, month, this.calendar);
             }
 
-            return this.monthDisplays[key];
+            return this.monthViews[key];
         };
 
-        CalendarDisplay.prototype.showMonth = function(year, month) {
+        CalendarView.prototype.showMonth = function(year, month) {
             var monthSpan = this.forcedMonthSpan ? this.forcedMonthSpan : (document.body.clientWidth < 640 ? 1 : 2),
                 child, next, i;
 
@@ -679,7 +544,7 @@
             this.currMonth = month;
 
             for (i = 0; i < monthSpan; i++) {
-                md = this.getMonthDisplay(year, month);
+                md = this.getMonthView(year, month);
                 this.monthContainer.appendChild(md.element);
 
                 md.clearMarkedDates();
@@ -696,7 +561,7 @@
             this.respectStartDate();
         };
 
-        CalendarDisplay.prototype.showPrevMonth = function() {
+        CalendarView.prototype.showPrevMonth = function() {
             var month = this.currMonth - 1, year = this.currYear;
 
             if (month < 1) {
@@ -707,7 +572,7 @@
             this.showMonth(year, month);
         };
 
-        CalendarDisplay.prototype.showNextMonth = function() {
+        CalendarView.prototype.showNextMonth = function() {
             var month = this.currMonth + 1, year = this.currYear;
 
             if (month > 12) {
@@ -718,7 +583,7 @@
             this.showMonth(year, month);
         };
 
-        CalendarDisplay.prototype.markDate = function(date, className, markCell) {
+        CalendarView.prototype.markDate = function(date, className, markCell) {
             var id = 'cal-day-' + date.year + '-' + (date.month < 10 ? '0' : '') + date.month + '-' + (date.day < 10 ? '0' : '') + date.day;
             var cell = this.monthContainer.querySelector('#' + id);
             if (cell) {
@@ -726,7 +591,7 @@
             }
         };
 
-        CalendarDisplay.prototype.markDateRange = function(dateRange, className, selectInHeader, dontAppendToRanges) {
+        CalendarView.prototype.markDateRange = function(dateRange, className, selectInHeader, dontAppendToRanges) {
             var rangeDisplay = new DateRangeDisplay(dateRange, this, className);
             rangeDisplay.render();
             if (selectInHeader) {
@@ -739,7 +604,7 @@
             return rangeDisplay;
         };
 
-        CalendarDisplay.prototype.unmarkDate = function(date, className, unmarkCell) {
+        CalendarView.prototype.unmarkDate = function(date, className, unmarkCell) {
             if (date) {
                 var id = 'cal-day-' + date.year + '-' + (date.month < 10 ? '0' : '') + date.month + '-' + (date.day < 10 ? '0' : '') + date.day;
                 var cell = this.monthContainer.querySelector('#' + id);
@@ -748,13 +613,13 @@
                 }
             } else {
                 var key;
-                for (key in this.monthDisplays) {
-                    this.monthDisplays[key].unmarkDates(className);
+                for (key in this.monthViews) {
+                    this.monthViews[key].unmarkDates(className);
                 }
             }
         };
 
-        CalendarDisplay.prototype.clearAllRanges = function() {
+        CalendarView.prototype.clearAllRanges = function() {
             var i;
 
             this.markDate(CalendarDate.today(), 'today');
@@ -765,13 +630,13 @@
             this.rangeDisplays = [];
         };
 
-        CalendarDisplay.prototype.startRangeSelect = function(date) {
+        CalendarView.prototype.startRangeSelect = function(date) {
             this.rangeSelectStart = date;
             this.currRange = new CalendarRange(date, date);
             this.rangeDisplay = this.markDateRange(this.currRange, 'highlight', true, true);
         };
 
-        CalendarDisplay.prototype.onClick = function(e) {
+        CalendarView.prototype.onClick = function(e) {
             if (e.target.classList.contains('cal-day')) {
                 e.preventDefault();
 
@@ -802,7 +667,7 @@
             }
         };
 
-        CalendarDisplay.prototype.onMouseMove = function(e) {
+        CalendarView.prototype.onMouseMove = function(e) {
             if (e.target.classList.contains('cal-day') && e.target != this.currCell && this.rangeSelectStart) {
                 if (e.target.classList.contains('disabled')) {
                     return;
@@ -822,7 +687,7 @@
             }
         };
 
-        CalendarDisplay.prototype.showTooltip = function(cell, days) {
+        CalendarView.prototype.showTooltip = function(cell, days) {
             if (this.isTooltipEnabled && cell) {
                 var left = 0, top = 0, el = cell;
                 while (el && el != this.element) {
@@ -838,7 +703,7 @@
             }
         };
 
-        CalendarDisplay.prototype.openAtPosition = function(left, top, activator) {
+        CalendarView.prototype.openAtPosition = function(left, top, activator) {
             if (document.body.clientWidth < 640) {
                 this.element.style.position = 'fixed';
                 this.element.style.left = '10px';
@@ -870,11 +735,11 @@
 
 
             setTimeout(function(){
-                CalendarDisplay.instance().cancelClose = false;
+                CalendarView.instance().cancelClose = false;
             }, 1000);
         };
 
-        CalendarDisplay.prototype.close = function() {
+        CalendarView.prototype.close = function() {
             if (!this.cancelClose) {
                 this.element.classList.remove('cal-visible');
                 if (this.dimmer) {
@@ -893,7 +758,7 @@
             }
         };
 
-        CalendarDisplay.prototype.setStartDate = function(startDate) {
+        CalendarView.prototype.setStartDate = function(startDate) {
             this.startDate = startDate;
             if (startDate) {
                 if (this.currYear * 100 + this.currMonth < startDate.year * 100 + startDate.month) {
@@ -906,12 +771,12 @@
             }
         };
 
-        CalendarDisplay.prototype.disableWeekends = function(disabled) {
+        CalendarView.prototype.disableWeekends = function(disabled) {
             this.weekendsDisabled = disabled;
             this.respectStartDate();
         };
 
-        CalendarDisplay.prototype.respectStartDate = function() {
+        CalendarView.prototype.respectStartDate = function() {
             var days, day, i, check;
 
             days = this.monthContainer.querySelectorAll('.cal-day');
@@ -953,7 +818,7 @@
             }
         };
 
-        CalendarDisplay.prototype.showHeader = function(show) {
+        CalendarView.prototype.showHeader = function(show) {
             if (show) {
                 this.element.classList.add('cal-with-header');
             } else {
@@ -961,11 +826,11 @@
             }
         };
 
-        CalendarDisplay.prototype.enableTooltip = function(enable) {
+        CalendarView.prototype.enableTooltip = function(enable) {
             this.isTooltipEnabled = (typeof enable == 'undefined') ? true : enable;
         };
 
-        CalendarDisplay.prototype.enableOtherMonths = function(enable) {
+        CalendarView.prototype.enableOtherMonths = function(enable) {
             this.showOtherMonths = (typeof enable == 'undefined') ? true : enable;
             if (this.showOtherMonths) {
                 this.element.classList.add('cal-with-othermonths');
@@ -974,21 +839,21 @@
             }
         };
 
-        CalendarDisplay.prototype.forceMonthSpan = function(span) {
+        CalendarView.prototype.forceMonthSpan = function(span) {
             this.forcedMonthSpan = span;
         };
 
-        CalendarDisplay.prototype.setMarkedDates = function(dates) {
+        CalendarView.prototype.setMarkedDates = function(dates) {
             this.markedDates = dates;
         }
 
-    CalendarDisplay.instance = function () {
-        if (!CalendarDisplay._instance) {
-            CalendarDisplay._instance = new CalendarDisplay(Calendar.instance());
-            document.body.appendChild(CalendarDisplay._instance.dimmer);
-            document.body.appendChild(CalendarDisplay._instance.element);
+    CalendarView.instance = function () {
+        if (!CalendarView._instance) {
+            CalendarView._instance = new CalendarView(Calendar.instance());
+            document.body.appendChild(CalendarView._instance.dimmer);
+            document.body.appendChild(CalendarView._instance.element);
         }
-        return CalendarDisplay._instance;
+        return CalendarView._instance;
     };
 
     function Calendar () {
@@ -1158,15 +1023,15 @@
         this.markedDates = {};
 
         if (options && ('inline' in options) && options.inline) {
-            this.calendarDisplay = new CalendarDisplay(Calendar.instance(), { inline: true });
-            this.element.parentElement.insertBefore(this.calendarDisplay.element, this.element.nextSibling);
+            this.calendarView = new CalendarView(Calendar.instance(), { inline: true });
+            this.element.parentElement.insertBefore(this.calendarView.element, this.element.nextSibling);
             this.element.style.position = 'absolute';
             this.element.style.zIndex = -100;
             this.element.style.pointerEvents = 'none';
             this.element.style.opacity = 0;
             this.isInline = true;
         } else {
-            this.calendarDisplay = CalendarDisplay.instance();
+            this.calendarView = CalendarView.instance();
             this.isInline = false;
             element.addEventListener('focus', this.onFocus.bind(this));
         }
@@ -1220,24 +1085,24 @@
         }
 
         if (this.isInline) {
-            this.prepareCalendarDisplay();
+            this.prepareCalendarView();
         }
     }
 
-        DatePicker.prototype.prepareCalendarDisplay = function() {
+        DatePicker.prototype.prepareCalendarView = function() {
             var date = this.date ? this.date : CalendarDate.today();
-            this.calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
-            this.calendarDisplay.showHeader(false);
-            this.calendarDisplay.setMarkedDates(this.markedDates);
-            this.calendarDisplay.forceMonthSpan(this.monthSpan);
-            this.calendarDisplay.showMonth(date.year, date.month);
-            this.calendarDisplay.setStartDate(this.startDate);
-            this.calendarDisplay.disableWeekends(this.weekendsDisabled);
-            this.calendarDisplay.enableOtherMonths(this.showOtherMonths);
-            this.calendarDisplay.clearAllRanges();
-            this.calendarDisplay.unmarkDate(null, 'selected');
+            this.calendarView.onSelectDate = this.onSelectDate.bind(this);
+            this.calendarView.showHeader(false);
+            this.calendarView.setMarkedDates(this.markedDates);
+            this.calendarView.forceMonthSpan(this.monthSpan);
+            this.calendarView.showMonth(date.year, date.month);
+            this.calendarView.setStartDate(this.startDate);
+            this.calendarView.disableWeekends(this.weekendsDisabled);
+            this.calendarView.enableOtherMonths(this.showOtherMonths);
+            this.calendarView.clearAllRanges();
+            this.calendarView.unmarkDate(null, 'selected');
             if (this.date) {
-                this.calendarDisplay.markDate(this.date, 'selected');
+                this.calendarView.markDate(this.date, 'selected');
             }
         }
 
@@ -1250,20 +1115,20 @@
                 el = el.offsetParent;
             }
 
-            this.prepareCalendarDisplay();
-            this.calendarDisplay.openAtPosition(left, top, this.element);
+            this.prepareCalendarView();
+            this.calendarView.openAtPosition(left, top, this.element);
         };
 
         DatePicker.prototype.onSelectDate = function(date, endsRange) {
             this.date = date;
             this.element.value = this.dateFormat.fill(date);
             if (this.isInline) {
-                this.calendarDisplay.unmarkDate(null, 'selected');
+                this.calendarView.unmarkDate(null, 'selected');
                 if (this.date) {
-                    this.calendarDisplay.markDate(this.date, 'selected');
+                    this.calendarView.markDate(this.date, 'selected');
                 }
             } else {
-                this.calendarDisplay.close();
+                this.calendarView.close();
             }
 
             if (this.changeCallback) {
@@ -1295,15 +1160,15 @@
         }
 
         if (options && ('inline' in options) && options.inline) {
-            this.calendarDisplay = new CalendarDisplay(Calendar.instance(), { inline: true });
-            this.element.parentElement.insertBefore(this.calendarDisplay.element, this.element.nextSibling);
+            this.calendarView = new CalendarView(Calendar.instance(), { inline: true });
+            this.element.parentElement.insertBefore(this.calendarView.element, this.element.nextSibling);
             this.element.style.position = 'absolute';
             this.element.style.zIndex = -100;
             this.element.style.pointerEvents = 'none';
             this.element.style.opacity = 0;
             this.isInline = true;
         } else {
-            this.calendarDisplay = CalendarDisplay.instance();
+            this.calendarView = CalendarView.instance();
             this.isInline = false;
         }
 
@@ -1381,26 +1246,26 @@
         }
 
         if (this.isInline) {
-            this.prepareCalendarDisplay();
+            this.prepareCalendarView();
         }
     }
 
-        DateRangePicker.prototype.prepareCalendarDisplay = function() {
+        DateRangePicker.prototype.prepareCalendarView = function() {
             var date = this.range ? this.range.start : CalendarDate.today();
-            this.calendarDisplay.onSelectDate = this.onSelectDate.bind(this);
-            this.calendarDisplay.onSelectRange = this.onSelectRange.bind(this);
-            this.calendarDisplay.enableTooltip(this.showDayCount);
-            this.calendarDisplay.showHeader(this.showHeader);
-            this.calendarDisplay.setMarkedDates(this.markedDates);
-            this.calendarDisplay.forceMonthSpan(this.monthSpan);
-            this.calendarDisplay.showMonth(date.year, date.month);
-            this.calendarDisplay.setStartDate(this.startDate);
-            this.calendarDisplay.disableWeekends(this.weekendsDisabled);
-            this.calendarDisplay.enableOtherMonths(this.showOtherMonths);
-            this.calendarDisplay.clearAllRanges();
+            this.calendarView.onSelectDate = this.onSelectDate.bind(this);
+            this.calendarView.onSelectRange = this.onSelectRange.bind(this);
+            this.calendarView.enableTooltip(this.showDayCount);
+            this.calendarView.showHeader(this.showHeader);
+            this.calendarView.setMarkedDates(this.markedDates);
+            this.calendarView.forceMonthSpan(this.monthSpan);
+            this.calendarView.showMonth(date.year, date.month);
+            this.calendarView.setStartDate(this.startDate);
+            this.calendarView.disableWeekends(this.weekendsDisabled);
+            this.calendarView.enableOtherMonths(this.showOtherMonths);
+            this.calendarView.clearAllRanges();
             if (this.range) {
-                this.calendarDisplay.showMonth(this.range.start.year, this.range.start.month);
-                this.calendarDisplay.markDateRange(this.range, 'selected', true);
+                this.calendarView.showMonth(this.range.start.year, this.range.start.month);
+                this.calendarView.markDateRange(this.range, 'selected', true);
             }
         }
 
@@ -1414,7 +1279,7 @@
                 el = el.offsetParent;
             }
 
-            this.calendarDisplay.openAtPosition(left, top, this.element);
+            this.calendarView.openAtPosition(left, top, this.element);
 
             if (document.body.clientWidth < 640) {
                 this.element.blur();
@@ -1426,21 +1291,21 @@
                 if (this.range) {
                     this.range = null;
                 }
-                this.calendarDisplay.clearAllRanges();
-                this.calendarDisplay.startRangeSelect(date);
+                this.calendarView.clearAllRanges();
+                this.calendarView.startRangeSelect(date);
             }
         };
 
         DateRangePicker.prototype.onSelectRange = function(range) {
             this.range = range;
-            this.calendarDisplay.markDateRange(this.range, 'selected', true);
+            this.calendarView.markDateRange(this.range, 'selected', true);
             this.element.value =
                 this.dateFormat.fill(range.start) +
                 this.separator +
                 this.dateFormat.fill(range.end);
 
             if (!this.isInline) {
-                this.calendarDisplay.close();
+                this.calendarView.close();
             }
 
             if (this.changeCallback) {
@@ -1456,11 +1321,11 @@
     window.addEventListener('click', function(e) {
         if (!e.target.datePicker) {
             var el = e.target;
-            while (el && !el.classList.contains('cal-display')) {
+            while (el && !el.classList.contains('cal-view')) {
                 el = el.parentElement;
             }
             if (!el) {
-                CalendarDisplay.instance().close();
+                CalendarView.instance().close();
             }
         }
     });

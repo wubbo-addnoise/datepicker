@@ -10,7 +10,7 @@
     opacity: 1;
 }
 
-.cal-display:not(.cal-inline) {
+.cal-view:not(.cal-inline) {
     position: absolute;
     z-index: 100000;
     width: 640px;
@@ -18,10 +18,10 @@
     transition: opacity .3s;
     opacity: 0;
 }
-.cal-display.cal-visible {
+.cal-view.cal-visible {
     opacity: 1;
 }
-.cal-display .cal-header {
+.cal-view .cal-header {
     display: none;
     justify-content: space-between;
     position: relative;
@@ -29,10 +29,10 @@
     border-top-right-radius: 3px;
     height: 57px;
 }
-.cal-display.cal-with-header .cal-header {
+.cal-view.cal-with-header .cal-header {
     display: flex;
 }
-.cal-display .cal-header-arrow {
+.cal-view .cal-header-arrow {
     position: absolute;
     top: 50%; left: 50%;
     margin-top: -16px;
@@ -65,7 +65,7 @@
 .cal-selected-date .cal-selected-date-weekday {
     font-size: 12px;
 }
-.cal-display .cal-months {
+.cal-view .cal-months {
     display: flex;
     justify-content: space-evenly;
 }
@@ -224,7 +224,7 @@
     right: 10px;
 }
 
-.cal-display.cal-with-header .cal-nav {
+.cal-view.cal-with-header .cal-nav {
     top: 66px;
 }
 

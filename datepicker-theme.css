@@ -24,16 +24,16 @@
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-.cal-display:not(.cal-inline) {
+.cal-view:not(.cal-inline) {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
     background-color: white;
     border-radius: 0;
 }
-.cal-display {
+.cal-view {
     color: #3D3D4F;
 }
 
-.cal-display .cal-header {
+.cal-view .cal-header {
     background-color: #F4F5F6;
     color: #746F70;
 }
@@ -109,7 +109,7 @@
     border-radius: 0;
 }
 
-.cal-display .cal-header-arrow {
+.cal-view .cal-header-arrow {
     background: center center / 32px 32px url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTAgMmwxNCAxNGwtMTQgMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0U0RTZFOSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPgo=");
 }
 
