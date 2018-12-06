@@ -877,7 +877,7 @@
             this.monthSymbols.push((new Date(2018, month, 1)).toLocaleDateString(locale, { month: 'long' }));
         }
 
-        this.startOfWeek = DatePicker.startOfWeek !== null ? DatePicker.startOfWeek : (DateRangePicker.startOfWeek !== null ? DateRangePicker.startOfWeek : 0);
+        this.startOfWeek = Picker.startOfWeek !== null ? Picker.startOfWeek : 0;
 
         if (!CalTranslate.current) {
             var lang = locale.replace(/-[^$]*$/, '').toLowerCase();
