@@ -1049,6 +1049,7 @@ function Picker(element, options) {
         } else {
             this.calendarView = CalendarView.instance();
             this.isInline = false;
+            this.element.type = "text";
             element.addEventListener('focus', this.onFocus.bind(this));
         }
 
@@ -1114,7 +1115,9 @@ function Picker(element, options) {
     Picker.prototype.prepareCalendarView = function() {
         var date = this.date ? this.date : CalendarDate.today();
         this.calendarView.onSelectDate = this.onSelectDate.bind(this);
-        this.calendarView.onSelectRange = this.onSelectRange.bind(this);
+        if ('onSelectRange' in this) {
+            this.calendarView.onSelectRange = this.onSelectRange.bind(this);
+        }
         this.calendarView.enableTooltip(this.showDayCount);
         this.calendarView.showHeader(this.showHeader);
         this.calendarView.setMarkedDates(this.markedDates);
