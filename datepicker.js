@@ -140,17 +140,29 @@
          * @param Date date The date
          */
         Pattern.prototype.fillDate = function(date) {
-            if (!(date instanceof Date)) return '';
+            var props;
 
-            var props = {
-                day: this.zeroPad(date.getDate(), 2),
-                year: this.zeroPad(date.getFullYear(), 2),
-                hours: this.zeroPad(date.getHours(), 2),
-                minutes: this.zeroPad(date.getMinutes(), 2),
-                month: this.zeroPad(date.getMonth(), 2),
-                seconds: this.zeroPad(date.getSeconds(), 2),
-                tz: date.getTimezoneOffset()
-            };
+            if (!(date instanceof Date)) {
+                props = {
+                    day: this.zeroPad(date.day||0, 2),
+                    year: this.zeroPad(date.year||0, 2),
+                    hours: this.zeroPad(date.hours||0, 2),
+                    minutes: this.zeroPad(date.minutes||0, 2),
+                    month: this.zeroPad(date.month||0, 2),
+                    seconds: this.zeroPad(date.seconds||0, 2),
+                    tz: date.tz||(new Date().getTimezoneOffset())
+                };
+            } else {
+                props = {
+                    day: this.zeroPad(date.getDate(), 2),
+                    year: this.zeroPad(date.getFullYear(), 2),
+                    hours: this.zeroPad(date.getHours(), 2),
+                    minutes: this.zeroPad(date.getMinutes(), 2),
+                    month: this.zeroPad(date.getMonth()+1, 2),
+                    seconds: this.zeroPad(date.getSeconds(), 2),
+                    tz: date.getTimezoneOffset()
+                };
+            }
 
             return this.fill(props);
         };
@@ -165,6 +177,31 @@
         url_part: '[^\/]+'
     };
 
+    function getOffset(el) {
+        var offset = { top: 0, left: 0, fixed: false };
+        var offsetParent = null;
+        var style;
+
+        while (el) {
+            style = getComputedStyle(el);
+            if (style.transform != 'none' && (m = style.transform.match(/matrix\(([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)\)/))) {
+                offset.left += Math.round(parseFloat(m[5].replace(/^\s+/, '')));
+                offset.top += Math.round(parseFloat(m[6].replace(/^\s+/, '')));
+            }
+            if (el.offsetParent != offsetParent) {
+                offset.top += el.offsetTop;
+                offset.left += el.offsetLeft;
+                offsetParent = el.offsetParent;
+            }
+            if (style.position == 'fixed') {
+                offset.fixed = true;
+                break;
+            }
+            el = el.parentElement;
+        }
+
+        return offset;
+    }
 
     /**
      * Represents a month table in the DOM
@@ -460,10 +497,10 @@
 
         if ('ontouchstart' in window) {
             this.element.addEventListener('touchend', this.onClick.bind(this));
-            this.dimmer = null;
         } else {
             this.element.addEventListener('click', this.onClick.bind(this));
             this.element.addEventListener('mousemove', this.onMouseMove.bind(this));
+            this.dimmer = null;
         }
 
         this.tooltip = document.createElement('div');
@@ -703,7 +740,7 @@
             }
         };
 
-        CalendarView.prototype.openAtPosition = function(left, top, activator) {
+        CalendarView.prototype.openAtPosition = function(offset, activator) {
             if (document.body.clientWidth < 640) {
                 this.element.style.position = 'fixed';
                 this.element.style.left = '10px';
@@ -712,12 +749,17 @@
                     this.dimmer.style.display = 'block';
                 }
             } else {
-                if (left + 660 > document.body.clientWidth) {
-                    left = (left + activator.offsetWidth) - 640;
+                var maxHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) + (offset.fixed ? 0 : window.pageYOffset);
+                console.log(offset, maxHeight);
+                if (offset.left + 660 > document.body.clientWidth) {
+                    offset.left = (offset.left + activator.offsetWidth) - 640;
                 }
-                this.element.style.position = 'absolute';
-                this.element.style.left = left + 'px';
-                this.element.style.top = (top + (activator ? activator.offsetHeight : 0)) + 'px';
+                if (maxHeight > 0 && offset.top + 300 > maxHeight) {
+                    offset.top -= 300 + activator.offsetHeight;
+                }
+                this.element.style.position = offset.fixed ? 'fixed' : 'absolute';
+                this.element.style.left = offset.left + 'px';
+                this.element.style.top = (offset.top + (activator ? activator.offsetHeight : 0)) + 'px';
             }
             this.element.style.display = 'block';
 
@@ -1137,17 +1179,10 @@ function Picker(element, options) {
     }
 
     Picker.prototype.onFocus = function(e) {
-        var el = this.element, left = 0, top = 0;
-        var date = this.range ? this.range.start : CalendarDate.today();
-
-        while (el) {
-            left += el.offsetLeft;
-            top += el.offsetTop;
-            el = el.offsetParent;
-        }
+        var offset = getOffset(this.element);
 
         this.prepareCalendarView();
-        this.calendarView.openAtPosition(left, top, this.element);
+        this.calendarView.openAtPosition(offset, this.element);
 
         if (document.body.clientWidth < 640) {
             this.element.blur();
@@ -1188,7 +1223,7 @@ function DatePicker(element, options) {
 
     DatePicker.prototype.onSelectDate = function(date, endsRange) {
         this.date = date;
-        this.element.value = this.dateFormat.fill(date);
+        this.element.value = this.dateFormat.fillDate(date);
         if (this.isInline) {
             this.calendarView.unmarkDate(null, 'selected');
             if (this.date) {
@@ -1231,9 +1266,9 @@ function DateRangePicker(element, options) {
         this.range = range;
         this.calendarView.markDateRange(this.range, 'selected', true);
         this.element.value =
-            this.dateFormat.fill(range.start) +
+            this.dateFormat.fillDate(range.start) +
             this.separator +
-            this.dateFormat.fill(range.end);
+            this.dateFormat.fillDate(range.end);
 
         if (!this.isInline) {
             this.calendarView.close();
