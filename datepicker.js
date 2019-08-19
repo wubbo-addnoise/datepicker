@@ -1388,6 +1388,9 @@ function DateRangePicker(element, options) {
                     this.dateFormat.fillDate(this.range.end);
             }
             if (!this.range && this.displayInput) this.displayInput.value = value;
+            if (this.range) {
+                this.calendarView.markDateRange(this.range, 'selected', true);
+            }
         }
     }
 
