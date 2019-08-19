@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no" />
-    <title>Datepicker</title>
+    <title>Date range picker</title>
 
     <style>
     *, :before, :after {
@@ -22,12 +22,14 @@
 </head>
 <body>
 
-    <input type="date" class="datepicker" name="mydate" />
+    <input type="date" class="datepicker" name="mydate_from" />
+    <input type="text" class="datepicker-end" name="mydate_to" />
 
 <script src="datepicker.js"></script>
 <script>
-    DatePicker.startOfWeek = 1;
-    new DatePicker(document.querySelector('[name="mydate"]'), {
+    Picker.startOfWeek = 1;
+    new DateRangePicker(document.querySelector('[name="mydate_from"]'), {
+        endRangeInput: '[name="mydate_to"]',
         showHeader: false,
         showDayCount: true,
         showOtherMonths: true,

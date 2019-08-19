@@ -1234,6 +1234,8 @@ function Picker(element, options) {
             }
         }
 
+        this.initOptions(options);
+
         if (element.hasAttribute("value")) {
             var value = element.getAttribute("value");
             this.setValue(value);
@@ -1245,8 +1247,8 @@ function Picker(element, options) {
                     this.dateFormat.fillDate(this.range.end);
             } else {
                 element.value = this.dateFormat.fillDate(this.date);
+                if (!this.date && this.displayInput) this.displayInput.value = value;
             }
-            if (!this.date && this.displayInput) this.displayInput.value = value;
         }
 
         if (this.isInline) {
@@ -1300,6 +1302,16 @@ function DatePicker(element, options) {
     this.construct(element, options);
 }
     DatePicker.prototype = Object.create(Picker.prototype);
+
+    DatePicker.prototype.initOptions = function(options) {
+        if (this.element.hasAttribute("value")) {
+            var value = this.element.getAttribute("value");
+            this.setValue(value);
+            this.element.value = this.dateFormat.fillDate(this.date);
+            if (!this.date && this.displayInput) this.displayInput.value = value;
+        }
+    }
+
     DatePicker.prototype.setValue = function(value) {
         var match;
 
@@ -1349,6 +1361,32 @@ function DateRangePicker(element, options) {
     this.construct(element, options);
 }
     DateRangePicker.prototype = Object.create(Picker.prototype);
+
+    DateRangePicker.prototype.initOptions = function(options) {
+        this.endRangeInput = null;
+
+        if (("endRangeInput" in options) && options.endRangeInput) {
+            if (options.endRangeInput instanceof HTMLElement) {
+                this.endRangeInput = options.endRangeInput;
+            } else if (typeof options.endRangeInput == "string") {
+                this.endRangeInput = document.querySelector(options.endRangeInput);
+            }
+        }
+
+        if (this.element.hasAttribute("value")) {
+            if (this.endRangeInput) {
+                this.element.value = this.dateFormat.fillDate(this.range.start);
+                this.endRangeInput.value = this.dateFormat.fillDate(this.range.end);
+            } else {
+                this.element.value =
+                    this.dateFormat.fillDate(this.range.start) +
+                    this.separator +
+                    this.dateFormat.fillDate(this.range.end);
+            }
+            if (!this.range && this.displayInput) this.displayInput.value = value;
+        }
+    }
+
     DateRangePicker.prototype.setValue = function(value) {
         var pair = value.split(this.separator), start, end, match;
 
@@ -1397,11 +1435,20 @@ function DateRangePicker(element, options) {
         this.range = range;
         this.calendarView.markDateRange(this.range, 'selected', true);
 
-        this.element.value =
-            this.dateFormat.fillDate(range.start) +
-            this.separator +
-            this.dateFormat.fillDate(range.end);
+        if (this.endRangeInput) {
+            this.element.value = this.dateFormat.fillDate(range.start);
+            this.endRangeInput.value = this.dateFormat.fillDate(range.end);
+        } else {
+            this.element.value =
+                this.dateFormat.fillDate(range.start) +
+                this.separator +
+                this.dateFormat.fillDate(range.end);
+        }
+
         this.element.dispatchEvent(new Event("change"));
+        if (this.endRangeInput) {
+            this.endRangeInput.dispatchEvent(new Event("change"));
+        }
 
         if (!this.isInline) {
             this.calendarView.close();
