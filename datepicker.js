@@ -1236,20 +1236,20 @@ function Picker(element, options) {
 
         this.initOptions(options);
 
-        if (element.hasAttribute("value")) {
-            var value = element.getAttribute("value");
-            this.setValue(value);
+        // if (element.hasAttribute("value")) {
+        //     var value = element.getAttribute("value");
+        //     this.setValue(value);
 
-            if (this.range) {
-                element.value =
-                    this.dateFormat.fillDate(this.range.start) +
-                    this.separator +
-                    this.dateFormat.fillDate(this.range.end);
-            } else {
-                element.value = this.dateFormat.fillDate(this.date);
-                if (!this.date && this.displayInput) this.displayInput.value = value;
-            }
-        }
+        //     if (this.range) {
+        //         element.value =
+        //             this.dateFormat.fillDate(this.range.start) +
+        //             this.separator +
+        //             this.dateFormat.fillDate(this.range.end);
+        //     } else {
+        //         element.value = this.dateFormat.fillDate(this.date);
+        //         if (!this.date && this.displayInput) this.displayInput.value = value;
+        //     }
+        // }
 
         if (this.isInline) {
             this.prepareCalendarView();
@@ -1374,10 +1374,14 @@ function DateRangePicker(element, options) {
         }
 
         if (this.element.hasAttribute("value")) {
+            var value = this.element.getAttribute("value");
+
             if (this.endRangeInput) {
+                this.setValue(value, this.endRangeInput.getAttribute("value"));
                 this.element.value = this.dateFormat.fillDate(this.range.start);
                 this.endRangeInput.value = this.dateFormat.fillDate(this.range.end);
             } else {
+                this.setValue(value);
                 this.element.value =
                     this.dateFormat.fillDate(this.range.start) +
                     this.separator +
@@ -1387,7 +1391,7 @@ function DateRangePicker(element, options) {
         }
     }
 
-    DateRangePicker.prototype.setValue = function(value) {
+    DateRangePicker.prototype.setValue = function(value, endValue) {
         var pair = value.split(this.separator), start, end, match;
 
         if (!value) {
@@ -1398,6 +1402,9 @@ function DateRangePicker(element, options) {
             this.element.value = "";
             this.range = null;
         } else {
+            if (typeof endValue == "undefined") {
+                pair = [ value, endValue ];
+            }
             if (pair[0]) {
                 match = this.dateFormat.match(pair[0]);
 
