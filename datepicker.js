@@ -142,6 +142,8 @@
         Pattern.prototype.fillDate = function(date) {
             var props;
 
+            if (!date) return "";
+
             if (!(date instanceof Date)) {
                 props = {
                     day: this.zeroPad(date.day||0, 2),
@@ -345,21 +347,39 @@
         };
 
         MonthView.prototype.unhighlightRanges = function() {
-            var i;
+            var i, cl, cls, j;
 
             for (i = 0; i < this.dayCells.length; i++) {
-                this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
-                this.dayCells[i].className = this.dayCells[i].className
-                    .replace(/\s+cal-day-range\b/, '')
-                    .replace(/\s+range-[^\s]+/, '');
+                cl = [];
+                for (j = 0; j < this.dayCells[i].classList.length; j++) {
+                    cls = this.dayCells[i].classList[j];
+                    if (cls.substr(0, 13) != 'cal-day-range' && cls.substr(0, 6) != 'range-') {
+                        cl.push(cls);
+                    }
+                }
+                this.dayCells[i].className = cl.join(' ');
+                // this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
+                // this.dayCells[i].className = this.dayCells[i].className
+                //     .replace(/\s+cal-day-range\b/, '')
+                //     .replace(/\s+range-[^\s]+/, '');
             }
         };
 
         MonthView.prototype.clearMarkedDates = function() {
+            var i, cl, cls, j;
+
             for (i = 0; i < this.dayCells.length; i++) {
-                this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
-                this.dayCells[i].className = this.dayCells[i].className
-                    .replace(/\s+marked-[^\s]+/, '');
+                cl = [];
+                for (j = 0; j < this.dayCells[i].classList.length; j++) {
+                    cls = this.dayCells[i].classList[j];
+                    if (cls.substr(0, 7) != 'marked-') {
+                        cl.push(cls);
+                    }
+                }
+                this.dayCells[i].className = cl.join(' ');
+                // this.dayCells[i].className = 'cal-day ' + (this.dayCells[i].classList.contains('today') ? ' today' : '');
+                // this.dayCells[i].className = this.dayCells[i].className
+                //     .replace(/\s+marked-[^\s]+/, '');
             }
         };
 
@@ -540,6 +560,8 @@
         this.weekendsDisabled = false;
         this.isTooltipEnabled = true;
         this.showOtherMonths = false;
+
+        this.closeTimeout = null;
 
         this.markedDates = {};
     }
@@ -741,6 +763,11 @@
         };
 
         CalendarView.prototype.openAtPosition = function(offset, activator) {
+            activator._calendarView = true;
+            if (this.closeTimeout) {
+                clearTimeout(this.closeTimeout);
+                this.closeTimeout = null;
+            }
             if (document.body.clientWidth < 640) {
                 this.element.style.position = 'fixed';
                 this.element.style.left = '10px';
@@ -750,7 +777,6 @@
                 }
             } else {
                 var maxHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) + (offset.fixed ? 0 : window.pageYOffset);
-                console.log(offset, maxHeight);
                 if (offset.left + 660 > document.body.clientWidth) {
                     offset.left = (offset.left + activator.offsetWidth) - 640;
                 }
@@ -799,6 +825,15 @@
                 }, 400);
             }
         };
+
+        CalendarView.prototype.delayedClose = function () {
+            if (this.closeTimeout) {
+                clearTimeout(this.closeTimeout);
+            }
+            this.closeTimeout = setTimeout(function(){
+                CalendarView.instance().close();
+            }, 100);
+        }
 
         CalendarView.prototype.setStartDate = function(startDate) {
             this.startDate = startDate;
@@ -1041,10 +1076,22 @@
             return new Date(this.year, this.month - 1, this.day);
         };
 
+        CalendarDate.prototype.toString = function() {
+            return this.year + "-" + this.lpad(this.month, 2) + "-" + this.lpad(this.day, 2);
+        };
+
     CalendarDate.today = function() {
         var date = new Date();
         return new CalendarDate(date.getFullYear(), date.getMonth()+1, date.getDate());
     };
+
+    CalendarDate.fromString = function (string) {
+        var match = string.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+            return new CalendarDate(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+        }
+        return null;
+    }
 
     function CalendarRange(start, end) {
         this.start = start;
@@ -1069,7 +1116,7 @@
 
         CalendarRange.prototype.getNumDays = function() {
             var diffSeconds = this.end.getUnixTime() - this.start.getUnixTime();
-            return 1 + (diffSeconds / 86400);
+            return Math.round(1 + (diffSeconds / 86400));
         };
 
 /** THE PICKERS **/
@@ -1090,12 +1137,19 @@ function Picker(element, options) {
         this.showOtherMonths = false;
         this.monthSpan = null;
         this.markedDates = {};
+        this.placeholder = "";
 
         if (options && ('showHeader' in options) && !options.showHeader) {
             this.showHeader = false;
         }
         if (options && ('showDayCount' in options) && !options.showDayCount) {
             this.showDayCount = false;
+        }
+        if (options && ('separator' in options)) {
+            this.separator = options.separator;
+        }
+        if (options && ('placeholder' in options)) {
+            this.placeholder = options.placeholder;
         }
 
         if (options && ('inline' in options) && options.inline) {
@@ -1180,8 +1234,19 @@ function Picker(element, options) {
             }
         }
 
-        if (element.value) {
-            this.setValue(element.value);
+        if (element.hasAttribute("value")) {
+            var value = element.getAttribute("value");
+            this.setValue(value);
+
+            if (this.range) {
+                element.value =
+                    this.dateFormat.fillDate(this.range.start) +
+                    this.separator +
+                    this.dateFormat.fillDate(this.range.end);
+            } else {
+                element.value = this.dateFormat.fillDate(this.date);
+            }
+            if (!this.date && this.displayInput) this.displayInput.value = value;
         }
 
         if (this.isInline) {
@@ -1229,6 +1294,7 @@ function Picker(element, options) {
     Picker.prototype.onSelectDate = function(date, endsRange) {};
 
 Picker.startOfWeek = null;
+window.Picker = Picker;
 
 function DatePicker(element, options) {
     this.construct(element, options);
@@ -1237,20 +1303,31 @@ function DatePicker(element, options) {
     DatePicker.prototype.setValue = function(value) {
         var match;
 
-        match = this.dateFormat.match(value);
-
-        if (match) {
-            this.date = new CalendarDate(match.year, match.month, match.day);
-
+        if (!value) {
             if (this.displayInput) {
-                this.displayInput.value = this.displayFormat.fillDate(this.date);
+                this.displayInput.value = this.placeholder;
+            }
+
+            this.element.value = "";
+            this.date = null;
+        } else {
+            match = this.dateFormat.match(value);
+
+            if (match) {
+                this.date = new CalendarDate(match.year, match.month, match.day);
+
+                if (this.displayInput) {
+                    this.displayInput.value = this.displayFormat.fillDate(this.date);
+                }
             }
         }
     };
 
     DatePicker.prototype.onSelectDate = function(date, endsRange) {
         this.date = date;
+
         this.element.value = this.dateFormat.fillDate(date);
+        this.element.dispatchEvent(new Event("change"));
         if (this.displayInput) {
             this.displayInput.value = this.displayFormat.fillDate(date);
         }
@@ -1274,24 +1351,34 @@ function DateRangePicker(element, options) {
     DateRangePicker.prototype = Object.create(Picker.prototype);
     DateRangePicker.prototype.setValue = function(value) {
         var pair = value.split(this.separator), start, end, match;
-        if (pair[0]) {
-            match = this.dateFormat.match(pair[0]);
 
-            if (match) {
-                start = new CalendarDate(match.year, match.month, match.day);
+        if (!value) {
+            if (this.displayInput) {
+                this.displayInput.value = this.placeholder;
+            }
 
-                if (pair.length > 1 && pair[1]) {
-                    match = this.dateFormat.match(pair[1]);
-                    if (match) {
-                        end = new CalendarDate(match.year, match.month, match.day);
+            this.element.value = "";
+            this.range = null;
+        } else {
+            if (pair[0]) {
+                match = this.dateFormat.match(pair[0]);
+
+                if (match) {
+                    start = new CalendarDate(match.year, match.month, match.day);
+
+                    if (pair.length > 1 && pair[1]) {
+                        match = this.dateFormat.match(pair[1]);
+                        if (match) {
+                            end = new CalendarDate(match.year, match.month, match.day);
+                        }
                     }
-                }
 
-                if (!end) {
-                    end = start;
-                }
+                    if (!end) {
+                        end = start;
+                    }
 
-                this.range = new CalendarRange(start, end);
+                    this.range = new CalendarRange(start, end);
+                }
             }
         }
     };
@@ -1309,10 +1396,12 @@ function DateRangePicker(element, options) {
     DateRangePicker.prototype.onSelectRange = function(range) {
         this.range = range;
         this.calendarView.markDateRange(this.range, 'selected', true);
+
         this.element.value =
             this.dateFormat.fillDate(range.start) +
             this.separator +
             this.dateFormat.fillDate(range.end);
+        this.element.dispatchEvent(new Event("change"));
 
         if (!this.isInline) {
             this.calendarView.close();
@@ -1325,29 +1414,43 @@ function DateRangePicker(element, options) {
 
     window.DatePicker = DatePicker;
     window.DateRangePicker = DateRangePicker;
+    window.CalendarDate = CalendarDate;
+    window.CalendarRange = CalendarRange;
 
     window.addEventListener('click', function(e) {
         if (!e.target.datePicker) {
             var el = e.target;
-            while (el && !el.classList.contains('cal-view')) {
+            while (el && !el.classList.contains('cal-view') && !("_calendarView" in el)) {
                 el = el.parentElement;
             }
             if (!el) {
-                CalendarView.instance().close();
+                CalendarView.instance().delayedClose();
             }
         }
     });
 
     if ('jQuery' in window) {
         jQuery.fn.datePicker = function(options) {
+            var args = Array.prototype.slice.call(arguments, 1);
             this.each(function() {
-                this._datePicker = new DatePicker(this, options);
+                if (!("_datePicker" in this)) {
+                    this._datePicker = new DatePicker(this, typeof options == "object" ? options : {});
+                }
+                if (typeof options == "string") {
+                    this._datePicker[options].apply(this._datePicker, args);
+                }
             });
             return this;
         }
         jQuery.fn.dateRangePicker = function(options) {
+            var args = Array.prototype.slice.call(arguments, 1);
             this.each(function() {
-                this._datePicker = new DateRangePicker(this, options);
+                if (!("_datePicker" in this)) {
+                    this._datePicker = new DateRangePicker(this, typeof options == "object" ? options : {});
+                }
+                if (typeof options == "string") {
+                    this._datePicker[options].apply(this._datePicker, args);
+                }
             });
             return this;
         }

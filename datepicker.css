@@ -1,3 +1,10 @@
+.cal-view, .cal-view * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .cal-dimmer {
     display: none;
     position: fixed;
@@ -224,6 +231,25 @@
 
 .cal-view.cal-with-header .cal-nav {
     top: 66px;
+}
+
+.cal-legend {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.cal-legend-item {
+    padding: 10px;
+}
+.cal-legend-item .cal-legend-box {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -2px;
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
 }
 
 
