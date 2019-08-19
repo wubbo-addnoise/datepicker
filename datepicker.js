@@ -1423,6 +1423,13 @@ function DateRangePicker(element, options) {
                     }
 
                     this.range = new CalendarRange(start, end);
+
+                    if (this.displayInput) {
+                        this.displayInput.value =
+                            this.displayFormat.fillDate(this.range.start) +
+                            this.separator +
+                            this.displayFormat.fillDate(this.range.end);
+                    }
                 }
             }
         }
@@ -1455,6 +1462,13 @@ function DateRangePicker(element, options) {
         this.element.dispatchEvent(new Event("change"));
         if (this.endRangeInput) {
             this.endRangeInput.dispatchEvent(new Event("change"));
+        }
+
+        if (this.displayInput) {
+            this.displayInput.value =
+                this.displayFormat.fillDate(this.range.start) +
+                this.separator +
+                this.displayFormat.fillDate(this.range.end);
         }
 
         if (!this.isInline) {
